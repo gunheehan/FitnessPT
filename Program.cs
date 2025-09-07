@@ -1,64 +1,65 @@
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using FitnessPT.Components;
-using FitnessPT.Components.Account;
-using FitnessPT.Data;
+using FitnessPT.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// .NET 8 Blazor Web App 서비스 추가
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
-builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+// HttpClient 설정 개선 (타임아웃 및 재시도 정책 추가)
+builder.Services.AddHttpClient<IExerciseApiService, ExerciseApiService>(client =>
+{
+    var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://redhorse.iptime.org:6001/";
+    if (!baseUrl.EndsWith("/"))
+        baseUrl += "/";
+    
+    client.BaseAddress = new Uri(baseUrl);
+    client.DefaultRequestHeaders.Add("User-Agent", "FitnessPT-Frontend/1.0");
+    client.Timeout = TimeSpan.FromSeconds(30); // 타임아웃 설정
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+{
+    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true // 개발용
+});
 
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddIdentityCookies();
+builder.Services.AddHttpClient<ICategoryApiService, CategoryApiService>(client =>
+{
+    var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://redhorse.iptime.org:6001/";
+    if (!baseUrl.EndsWith("/"))
+        baseUrl += "/";
+    
+    client.BaseAddress = new Uri(baseUrl);
+    client.DefaultRequestHeaders.Add("User-Agent", "FitnessPT-Frontend/1.0");
+    client.Timeout = TimeSpan.FromSeconds(30); // 타임아웃 설정
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+{
+    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true // 개발용
+});
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-                       throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+// 서비스 등록 - Scoped로 변경하여 생명주기 관리
+builder.Services.AddScoped<IExerciseApiService, ExerciseApiService>();
+builder.Services.AddScoped<ICategoryApiService, CategoryApiService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseMigrationsEndPoint();
-}
-else
+// Configure the HTTP request pipeline
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+// .NET 8 Blazor Web App을 위한 라우팅 설정
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// Add additional endpoints required by the Identity /Account Razor components.
-app.MapAdditionalIdentityEndpoints();
+// 포트 설정
+app.Urls.Add("http://0.0.0.0:5100");
 
 app.Run();

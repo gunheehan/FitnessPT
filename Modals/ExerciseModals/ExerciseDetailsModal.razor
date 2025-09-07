@@ -1,0 +1,243 @@
+@using FitnessPT.Services
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+
+<div class="modal fade" id="exerciseDetailsModal" tabindex="-1" aria-labelledby="exerciseDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exerciseDetailsModalLabel">
+                    <i class="fas fa-eye text-info"></i> 운동 상세 정보
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (selectedExercise != null)
+                {
+                    <div class="row">
+                        <!-- 기본 정보 -->
+                        <div class="col-12 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-info-circle"></i> 기본 정보
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h4 class="mb-3">@selectedExercise.ExerciseName</h4>
+                                            <div class="mb-2">
+                                                @if (!string.IsNullOrEmpty(selectedExercise.CategoryName))
+                                                {
+                                                    <span class="badge bg-secondary me-2">
+                                                        <i class="fas fa-folder"></i> @selectedExercise.CategoryName
+                                                    </span>
+                                                }
+                                                @if (!string.IsNullOrEmpty(selectedExercise.DifficultyName))
+                                                {
+                                                    <span class="badge @GetDifficultyBadgeClass(selectedExercise.DifficultyLevel)">
+                                                        <i class="fas fa-chart-line"></i> @selectedExercise.DifficultyName
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="badge @(selectedExercise.IsActive == true ? "bg-success" : "bg-warning") fs-6">
+                                                <i class="fas @(selectedExercise.IsActive == true ? "fa-check-circle" : "fa-pause-circle")"></i>
+                                                @(selectedExercise.IsActive == true ? "활성" : "비활성")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 대상 근육 -->
+                        @if (!string.IsNullOrEmpty(selectedExercise.TargetMuscles))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-crosshairs text-primary"></i> 대상 근육
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach (var muscle in selectedExercise.TargetMuscles.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                            {
+                                                <span class="badge bg-primary">@muscle.Trim()</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- 메타 정보 -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-info text-secondary"></i> 메타 정보
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td><strong>운동 ID:</strong></td>
+                                            <td>@selectedExercise.ExerciseId</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>카테고리 코드:</strong></td>
+                                            <td>@(selectedExercise.CategoryCode ?? "미설정")</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>생성일:</strong></td>
+                                            <td>@selectedExercise.CreatedAt?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 운동 설명 -->
+                        @if (!string.IsNullOrEmpty(selectedExercise.Instructions))
+                        {
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-list-ol text-success"></i> 운동 설명
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="instructions-content">
+                                            @((MarkupString)FormatInstructions(selectedExercise.Instructions))
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle"></i>
+                                    운동 설명이 등록되지 않았습니다.
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h5>운동 정보를 불러올 수 없습니다.</h5>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> 닫기
+                </button>
+                @if (selectedExercise != null)
+                {
+                    <button type="button" class="btn btn-primary" @onclick="() => CopyToClipboard()">
+                        <i class="fas fa-copy"></i> 정보 복사
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ExerciseDto? selectedExercise;
+
+    public async Task ShowAsync(ExerciseDto exercise)
+    {
+        selectedExercise = exercise;
+
+        // 모달 표시
+        await JSRuntime.InvokeVoidAsync("showModal", "exerciseDetailsModal");
+        StateHasChanged();
+    }
+
+    private string GetDifficultyBadgeClass(int? difficultyLevel)
+    {
+        return difficultyLevel switch
+        {
+            1 => "bg-success",
+            2 => "bg-warning",
+            3 => "bg-danger",
+            4 => "bg-dark",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string FormatInstructions(string instructions)
+    {
+        if (string.IsNullOrEmpty(instructions))
+            return "";
+
+        // 줄바꿈을 <br>로 변환하고 번호가 있는 줄은 강조
+        var lines = instructions.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        var formatted = new List<string>();
+
+        foreach (var line in lines)
+        {
+            var trimmedLine = line.Trim();
+            if (string.IsNullOrEmpty(trimmedLine))
+                continue;
+
+            // 숫자로 시작하는 줄 (1., 2., 등) 강조
+            if (System.Text.RegularExpressions.Regex.IsMatch(trimmedLine, @"^\d+\."))
+            {
+                formatted.Add($"<div class='mb-2'><strong>{trimmedLine}</strong></div>");
+            }
+            else
+            {
+                formatted.Add($"<div class='mb-1'>{trimmedLine}</div>");
+            }
+        }
+
+        return string.Join("", formatted);
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (selectedExercise == null) return;
+
+        var copyText = $"운동명: {selectedExercise.ExerciseName}\n" +
+                       $"카테고리: {selectedExercise.CategoryName ?? "미설정"}\n" +
+                       $"난이도: {selectedExercise.DifficultyName ?? "미설정"}\n" +
+                       $"대상 근육: {selectedExercise.TargetMuscles ?? "미설정"}\n" +
+                       $"상태: {(selectedExercise.IsActive == true ? "활성" : "비활성")}\n" +
+                       $"생성일: {selectedExercise.CreatedAt?.ToString("yyyy-MM-dd")}\n\n" +
+                       $"운동 설명:\n{selectedExercise.Instructions ?? "설명 없음"}";
+
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", copyText);
+        await JSRuntime.InvokeVoidAsync("alert", "운동 정보가 클립보드에 복사되었습니다.");
+    }
+}
+
+<style>
+    .instructions-content {
+        line-height: 1.6;
+    }
+    
+    .instructions-content div {
+        margin-bottom: 0.5rem;
+    }
+    
+    .badge {
+        font-size: 0.875em;
+    }
+    
+    .card-header h6 {
+        color: #495057;
+    }
+</style>
