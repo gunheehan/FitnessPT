@@ -54,6 +54,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.MapGet("/", () => Results.Redirect("/contents_manager"));
 
 // .NET 8 Blazor Web App을 위한 라우팅 설정
 app.MapRazorComponents<App>()
