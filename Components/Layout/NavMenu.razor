@@ -1,63 +1,47 @@
-﻿@implements IDisposable
+﻿@using FitnessPT.Services
+@inject AuthService AuthService
 
-@inject NavigationManager NavigationManager
+<div class="nav-menu">
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">🏋️ FitnessPT</a>
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">FitnessPT</a>
-    </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler"/>
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
+            <div class="navbar-nav ms-auto">
+                @if (AuthService.IsAuthenticated)
+                {
+                <span class="navbar-text me-3">
+                        👋 @AuthService.CurrentUser?.Name
+                    </span>
+                <button class="btn btn-outline-danger btn-sm" @onclick="Logout">
+                    로그아웃
+                </button>
+                }
+                else
+                {
+                <a class="btn btn-primary btn-sm" href="/login">
+                    로그인
+                </a>
+                }
+            </div>
         </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div>
-
-        
     </nav>
 </div>
 
 @code {
-    private string? currentUrl;
 
     protected override void OnInitialized()
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
+        AuthService.OnAuthStateChanged += StateHasChanged;
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    private async Task Logout()
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        StateHasChanged();
+        await AuthService.LogoutAsync();
     }
 
     public void Dispose()
     {
-        NavigationManager.LocationChanged -= OnLocationChanged;
+        AuthService.OnAuthStateChanged -= StateHasChanged;
     }
 
 }

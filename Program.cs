@@ -1,10 +1,20 @@
 using FitnessPT.Components;
+using FitnessPT.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // .NET 8 Blazor Web App 서비스 추가
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] 
+                 ?? "http://localhost:5117";
+
+builder.Services.AddScoped(sp => new HttpClient 
+{ 
+    BaseAddress = new Uri(apiBaseUrl)
+});
+
+builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 

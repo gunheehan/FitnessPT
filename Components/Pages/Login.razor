@@ -1,0 +1,131 @@
+@page "/login"
+@using FitnessPT.Services
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject IConfiguration Configuration
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+
+<PageTitle>로그인 - FitnessPT</PageTitle>
+
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-header">
+            <h1>🏋️ FitnessPT</h1>
+            <p class="subtitle">Google 계정으로 시작하세요</p>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>로그인 처리 중...</p>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">
+                @errorMessage
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success">
+                @successMessage
+            </div>
+        }
+
+        <div class="google-signin-wrapper">
+            <div id="googleButtonContainer"></div>
+        </div>
+
+        <div class="info-section">
+            <p>🔒 안전한 Google OAuth 인증</p>
+            <p>📱 모든 기기에서 동기화</p>
+            <p>🎯 간편한 운동 기록 관리</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isLoading = false;
+    private string? errorMessage;
+    private string? successMessage;
+    private DotNetObjectReference<Login>? dotNetRef;
+    private IJSObjectReference? module;
+
+    private string GoogleClientId => Configuration["Authentication:Google:ClientId"] ?? "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                module = await JS.InvokeAsync<IJSObjectReference>(
+                    "import", "./Components/Pages/Login.razor.js");
+
+                dotNetRef = DotNetObjectReference.Create(this);
+
+                await JS.InvokeVoidAsync("Login.initialize", 
+                    dotNetRef, GoogleClientId); 
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Script load error: {ex.Message}");
+                errorMessage = "페이지 로드 중 오류가 발생했습니다.";
+                StateHasChanged();
+            }
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleGoogleLogin(string googleToken)
+    {
+        isLoading = true;
+        errorMessage = null;
+        successMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            Console.WriteLine($"🔐 Google Token received");
+
+            var result = await AuthService.LoginWithGoogleAsync(googleToken);
+
+            if (result.Success)
+            {
+                successMessage = $"환영합니다, {result.User?.Name}님!";
+                StateHasChanged();
+
+                await Task.Delay(3000);
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage ?? "로그인에 실패했습니다.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"오류 발생: {ex.Message}";
+            Console.Error.WriteLine($"Login error: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        dotNetRef?.Dispose();
+
+        if (module != null)
+        {
+            await module.DisposeAsync();
+        }
+    }
+}
