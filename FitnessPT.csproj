@@ -21,4 +21,9 @@
         <Folder Include="Models\GoogleAuth\" />
         <Folder Include="Services\" />
     </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="**/.git/**" />
+        <None Remove="**/.idea/**" />
+    </ItemGroup>
 </Project>
