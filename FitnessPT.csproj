@@ -13,5 +13,12 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.5"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.5"/>
     </ItemGroup>
-
+    <ItemGroup>
+        <Folder Include="Components\Pages\" />
+        <Folder Include="Components\Auth\" />
+        <Folder Include="Components\Layout\" />
+        <Folder Include="Models\" />
+        <Folder Include="Models\GoogleAuth\" />
+        <Folder Include="Services\" />
+    </ItemGroup>
 </Project>
