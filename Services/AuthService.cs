@@ -23,7 +23,7 @@ public class AuthService
     {
         try
         {
-            var apiUrl = configuration["ApiSettings:BaseUrl"];
+            var apiUrl = configuration["FITNESSPT:ApiSettings:BaseUrl"];
             var request = new GoogleAuthRequest { GoogleToken = googleToken };
             var response = await client.PostAsJsonAsync($"{apiUrl}/api/GoogleAuth/login", request);
             var result = await response.Content.ReadFromJsonAsync<GoogleAuthResult>();

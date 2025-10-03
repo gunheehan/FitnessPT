@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // .NET 8 Blazor Web App 서비스 추가
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] 
+var apiBaseUrl = builder.Configuration["FITNESSPT:ApiSettings:BaseUrl"] 
                  ?? "http://localhost:5117";
 
 builder.Services.AddScoped(sp => new HttpClient 

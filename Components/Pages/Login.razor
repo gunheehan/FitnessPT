@@ -55,7 +55,7 @@
     private DotNetObjectReference<Login>? dotNetRef;
     private IJSObjectReference? module;
 
-    private string GoogleClientId => Configuration["Authentication:Google:ClientId"] ?? "";
+    private string GoogleClientId => Configuration["FITNESSPT:Authentication:Google:ClientId"] ?? "";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
