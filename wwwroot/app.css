@@ -1,33 +1,8 @@
-/* 전역 스타일 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
-html, body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    height: 100%;
-}
-
-body {
-    margin: 0;
-    background: #f8f9fa;
-}
-
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-button {
-    cursor: pointer;
-    font-family: inherit;
-}
 
 /* 네비게이션 */
 .navbar {
-    background: white !important;
+    background: white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     padding: 1rem 0;
 }
@@ -38,7 +13,7 @@ button {
     gap: 10px;
     font-size: 1.5rem;
     font-weight: bold;
-    color: #667eea !important;
+    color: #667eea;
 }
 
 .logo {

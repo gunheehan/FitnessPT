@@ -1,0 +1,129 @@
+@page "/exercises"
+@using FitnessPT.Dtos
+@using FitnessPT.Services
+@using FitnessPT.Components.Modals
+@inject ExerciseService ExerciseService
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<PageTitle>운동 관리 - FitnessPT</PageTitle>
+
+<div class="exercises-container">
+    <div class="page-header">
+        <h3>운동 관리</h3>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            새 운동 추가
+        </button>
+    </div>
+
+    <!--필터 -->
+    <div class="search-section">
+        <div class="filters">
+            <select class="form-select" @bind="selectedLevel" @bind:after="ApplyFilters">
+                <option value="">모든 레벨</option>
+                <option value="Beginner">초급</option>
+                <option value="Intermediate">중급</option>
+                <option value="Advanced">고급</option>
+            </select>
+
+            <select class="form-select" @bind="selectedCategory" @bind:after="ApplyFilters">
+                <option value="">모든 카테고리</option>
+                <option value="UpperBody">상체</option>
+                <option value="LowerBody">하체</option>
+                <option value="Core">코어</option>
+                <option value="Cardio">유산소</option>
+                <option value="FullBody">전신</option>
+            </select>
+
+            @if (!string.IsNullOrEmpty(selectedLevel) || !string.IsNullOrEmpty(selectedCategory))
+            {
+                <button class="btn btn-secondary" @onclick="ClearFilters">
+                    ✖ 초기화
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- 로딩 -->
+    @if (isLoading)
+    {
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>운동 목록을 불러오는 중...</p>
+        </div>
+    }
+    else if (errorMessage != null)
+    {
+        <div class="alert alert-danger">
+            <strong>오류:</strong> @errorMessage
+            <button class="btn btn-sm btn-secondary" @onclick="LoadExercises">
+                다시 시도
+            </button>
+        </div>
+    }
+    else if (exercises == null || !exercises.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🏋️</div>
+            <h3>운동이 없습니다</h3>
+            <p>새로운 운동을 추가해보세요!</p>
+            <button class="btn btn-primary" @onclick="OpenCreateModal">
+                ➕ 첫 운동 추가하기
+            </button>
+        </div>
+    }
+    else
+    {
+        <!-- 운동 카드 그리드 -->
+        <div class="exercises-grid">
+            @foreach (var exercise in exercises)
+            {
+                <ExerciseCard 
+                    Exercise="exercise"
+                    OnEdit="() => OpenEditModal(exercise)"
+                    OnDelete="() => DeleteExercise(exercise.Id)" />
+            }
+        </div>
+
+        <!-- 페이징 -->
+        @if (totalPages > 1)
+        {
+            <div class="pagination">
+                <button class="btn btn-page" 
+                        disabled="@(currentPage == 1)"
+                        @onclick="() => ChangePage(currentPage - 1)">
+                    ← 이전
+                </button>
+
+                <span class="page-info">
+                    @currentPage / @totalPages 페이지 (총 @totalCount 개)
+                </span>
+
+                <button class="btn btn-page" 
+                        disabled="@(currentPage == totalPages)"
+                        @onclick="() => ChangePage(currentPage + 1)">
+                    다음 →
+                </button>
+            </div>
+        }
+    }
+
+    <!-- 관리자 인증 모달 -->
+    @if (showAuth)
+    {
+    <AdminModal
+        OnAuthenticated="OpenAuthModal"
+        OnClose="CloseAuthModal" />
+    }
+
+    <!-- 추가/수정 모달 -->
+    @if (showModal && isAuth)
+    {
+        <ExerciseModal 
+            Exercise="selectedExercise"
+            IsEdit="isEditMode"
+            OnSave="SaveExercise"
+            OnClose="CloseEditModal" />
+    }
+    
+</div>

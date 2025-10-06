@@ -1,0 +1,69 @@
+@using FitnessPT.Dtos
+
+<div class="exercise-card">
+    <div class="card-image-wrapper">
+        @if (!string.IsNullOrEmpty(Exercise.ImageUrl))
+        {
+        <div class="card-image" style="background-image: url('@Exercise.ImageUrl')"></div>
+        }
+        <span class="badge-level">@GetLevelText()</span>
+    </div>
+
+    <div class="card-body">
+        <div class="title-area">
+            <h3 class="exercise-title">@Exercise.Name</h3>
+            <span class="badge-category">@GetCategoryText()</span>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Exercise.Description))
+        {
+        <p class="exercise-desc">@Exercise.Description</p>
+        }
+
+        @if (!string.IsNullOrEmpty(Exercise.CategoryDetail))
+        {
+        <div class="detail-box">
+            <span>상세 설명 : </span>
+            <span>@Exercise.CategoryDetail</span>
+        </div>
+        }
+
+        <div class="action-buttons">
+            <button class="btn-edit" @onclick="OnEdit">수정</button>
+            <button class="btn-delete" @onclick="OnDelete">삭제</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ExerciseDto Exercise { get; set; } = null!;
+
+    [Parameter] public EventCallback OnEdit { get; set; }
+
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private string GetLevelText()
+    {
+        return Exercise.Level switch
+        {
+            "beginner" => "초급",
+            "intermediate" => "중급",
+            "advanced" => "고급",
+            _ => Exercise.Level ?? ""
+        };
+    }
+
+    private string GetCategoryText()
+    {
+        return Exercise.Category?.ToLower() switch
+        {
+            "upper_body" => "상체",
+            "lower_body" => "하체",
+            "core" => "코어",
+            "cardio" => "유산소",
+            "full_body" => "전신",
+            _ => Exercise.Category ?? ""
+        };
+    }
+
+}

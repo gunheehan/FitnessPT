@@ -7,6 +7,7 @@ public partial class AdminModal : ComponentBase
 {
     private readonly string Pin = "0305";
     [Parameter] public EventCallback OnAuthenticated { get; set; } // 검증 성공 시 호출
+    [Parameter] public EventCallback OnClose { get; set; } // 모달 닫기
 
     private string[] pinInputs = new string[4]; // 각 입력 칸에 입력된 PIN 값 저장
     private bool invalidPin = false; // 초기값은 false로 설정
@@ -17,7 +18,12 @@ public partial class AdminModal : ComponentBase
     private string description;
     private string submitText;
     private string errorMessage;
-
+    
+    private void CloseModal(MouseEventArgs e)
+    {
+        Console.WriteLine("Close Call");
+        OnClose.InvokeAsync();
+    }
     protected override void OnInitialized()
     {
         for (int i = 0; i < pinInputs.Length; i++)

@@ -1,5 +1,6 @@
 using FitnessPT.Components;
 using FitnessPT.Services;
+using FitnessPT.Services.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,8 @@ builder.Services.AddScoped(sp => new HttpClient
 { 
     BaseAddress = new Uri(apiBaseUrl)
 });
-
+builder.Services.AddScoped<IApiClient, ApiClient>();
+builder.Services.AddScoped<ExerciseService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddRazorPages();
 

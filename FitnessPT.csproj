@@ -16,14 +16,16 @@
     <ItemGroup>
         <Folder Include="Components\Auth\" />
         <Folder Include="Components\Layout\" />
-        <Folder Include="Models\" />
         <Folder Include="Models\GoogleAuth\" />
-        <Folder Include="Services\" />
         <Folder Include="wwwroot\img\" />
     </ItemGroup>
 
     <ItemGroup>
         <None Remove="**/.git/**" />
         <None Remove="**/.idea/**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Pages\Admin\ExerciseManagement.razor" />
     </ItemGroup>
 </Project>
