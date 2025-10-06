@@ -15,6 +15,7 @@ builder.Services.AddScoped(sp => new HttpClient
 });
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
@@ -32,7 +33,7 @@ app.UseAntiforgery();
 // .NET 8 Blazor Web App을 위한 라우팅 설정
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
+app.MapRazorPages();
 // 포트 설정
 app.Urls.Add("http://0.0.0.0:5100");
 
