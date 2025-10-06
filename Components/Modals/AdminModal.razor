@@ -1,0 +1,26 @@
+
+<div class="modal-overlay">
+    <div class="modal-content">
+        <div class="content-container">
+            <div class="pin">
+                <div class="pin__title">@title</div>
+                <div class="pin__desctription">@description</div>
+
+                <img src="/img/icon-lock.svg" alt="pin" class="pin__icon">
+
+                <div class="pin__input-group">
+                    <input type="text" inputmode="numeric" maxlength="1" class="@($"{(invalidPin ? "pin__input warning" : "pin__input")} {(pinInputs[0] != "" ? "enable" : "")}")" @ref="pinElements[0]" @oninput="@(e => OnInputChanged(e, 0))" @onkeyup="@(e => OnKeyUp(e, 0))">
+                    <input type="text" inputmode="numeric" maxlength="1" class="@($"{(invalidPin ? "pin__input warning" : "pin__input")} {(pinInputs[1] != "" ? "enable" : "")}")"  @ref="pinElements[1]" @oninput="@(e => OnInputChanged(e, 1))" @onkeyup="@(e => OnKeyUp(e, 1))">
+                    <input type="text" inputmode="numeric" maxlength="1" class="@($"{(invalidPin ? "pin__input warning" : "pin__input")} {(pinInputs[2] != "" ? "enable" : "")}")"  @ref="pinElements[2]" @oninput="@(e => OnInputChanged(e, 2))" @onkeyup="@(e => OnKeyUp(e, 2))">
+                    <input type="text" inputmode="numeric" maxlength="1" class="@($"{(invalidPin ? "pin__input warning" : "pin__input")} {(pinInputs[3] != "" ? "enable" : "")}")"  @ref="pinElements[3]" @oninput="@(e => OnInputChanged(e, 3))" @onkeyup="@(e => OnKeyUp(e, 3))">
+                </div>
+                <div class="pin__error-msg @(invalidPin ? "visible" : "hidden")">
+                    @errorMessage
+                </div>
+                <div class="button-container">
+                    <button class="submit-button btn-primary @(isPinComplete ? "active" : "")" @onclick="SubmitPin" disabled="@(!isPinComplete)">@submitText</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
