@@ -33,20 +33,21 @@
 @code {
     private User? user;
     
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         // 이벤트 구독
         AuthService.OnAuthStateChanged += OnRefreshAccount;
     }
-
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await AuthService.InitializeAsync();
+            StateHasChanged();
         }
     }
-
+    
     public void OnRefreshAccount(User? _user)
     {
         Console.WriteLine("####### User Data Get");
