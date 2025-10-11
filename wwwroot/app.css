@@ -250,6 +250,7 @@
     padding: 20px;
     max-width: 90%;
     max-height: 90%;
+    overflow-y: auto;
 }
 
 /* 페이드인 애니메이션 */
