@@ -9,7 +9,6 @@
 @rendermode InteractiveServer
 
 <PageTitle>운동 관리 - FitnessPT</PageTitle>
-<NavMenu />
 
 <div class="exercises-container">
     <div class="page-header">
@@ -24,18 +23,18 @@
         <div class="filters">
             <select class="form-select" @bind="selectedLevel" @bind:after="ApplyFilters">
                 <option value="">모든 레벨</option>
-                <option value="Beginner">초급</option>
-                <option value="Intermediate">중급</option>
-                <option value="Advanced">고급</option>
+                <option value="beginner">초급</option>
+                <option value="intermediate">중급</option>
+                <option value="advanced">고급</option>
             </select>
 
             <select class="form-select" @bind="selectedCategory" @bind:after="ApplyFilters">
                 <option value="">모든 카테고리</option>
-                <option value="UpperBody">상체</option>
-                <option value="LowerBody">하체</option>
-                <option value="Core">코어</option>
-                <option value="Cardio">유산소</option>
-                <option value="FullBody">전신</option>
+                <option value="upper_body">상체</option>
+                <option value="lower_body">하체</option>
+                <option value="core">코어</option>
+                <option value="cardio">유산소</option>
+                <option value="full_body">전신</option>
             </select>
 
             @if (!string.IsNullOrEmpty(selectedLevel) || !string.IsNullOrEmpty(selectedCategory))
