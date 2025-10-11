@@ -5,7 +5,6 @@
 @inject IJSRuntime JS
 @inject IConfiguration Configuration
 @rendermode InteractiveServer
-@implements IAsyncDisposable
 
 <PageTitle>로그인 - FitnessPT</PageTitle>
 
@@ -63,13 +62,18 @@
         {
             try
             {
+                if(AuthService.IsAuthenticated)
+                    Navigation.NavigateTo("/exercises");
+                
                 module = await JS.InvokeAsync<IJSObjectReference>(
                     "import", "./Components/Pages/Login.razor.js");
 
                 dotNetRef = DotNetObjectReference.Create(this);
 
                 await JS.InvokeVoidAsync("Login.initialize", 
-                    dotNetRef, GoogleClientId); 
+                    dotNetRef, GoogleClientId);
+                
+                StateHasChanged();
             }
             catch (Exception ex)
             {
@@ -100,7 +104,7 @@
                 StateHasChanged();
 
                 await Task.Delay(3000);
-                Navigation.NavigateTo("/exercises", forceLoad: true);
+                Navigation.NavigateTo("/exercises");
             }
             else
             {
@@ -116,16 +120,6 @@
         {
             isLoading = false;
             StateHasChanged();
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        dotNetRef?.Dispose();
-
-        if (module != null)
-        {
-            await module.DisposeAsync();
         }
     }
 }

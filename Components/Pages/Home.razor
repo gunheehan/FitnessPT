@@ -1,6 +1,4 @@
 @page "/"
-@using FitnessPT.Services
-@inject AuthService AuthService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @rendermode InteractiveServer
@@ -8,82 +6,49 @@
 <PageTitle>FitnessPT - 홈</PageTitle>
 
 <div class="home-container">
-    @if (AuthService.IsAuthenticated)
-    {
-        <div class="welcome-section">
-            <h1>안녕하세요, @AuthService.CurrentUser?.Name 님! 👋</h1>
-            <p class="lead">오늘도 열심히 운동하셨나요?</p>
+    <div class="landing-section">
+        <div class="hero">
+            <h1 class="hero-title">
+                <span class="emoji">🏋️</span>
+                운동 기록의 시작
+                <br/>
+                <span class="highlight">FitnessPT</span>
+            </h1>
+            <p class="hero-subtitle">
+                나만의 운동 일지를 기록하고<br/>
+                친구들과 함께 성장하세요
+            </p>
+            <button class="btn btn-primary btn-lg" @onclick="GoToLogin">
+                Google로 시작하기 →
+            </button>
+        </div>
 
-            <div class="quick-actions">
-                <div class="action-card">
-                    <div class="action-icon">📊</div>
-                    <h3>운동 기록</h3>
-                    <p>오늘의 운동을 기록하세요</p>
-                    <button class="btn btn-primary">기록하기</button>
-                </div>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>운동 기록 관리</h3>
+                <p>매일의 운동을 쉽게 기록하고 관리하세요</p>
+            </div>
 
-                <div class="action-card">
-                    <div class="action-icon">📅</div>
-                    <h3>캘린더</h3>
-                    <p>운동 이력을 확인하세요</p>
-                    <button class="btn btn-primary">보기</button>
-                </div>
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3>캘린더 뷰</h3>
+                <p>한눈에 보는 나의 운동 이력</p>
+            </div>
 
-                <div class="action-card">
-                    <div class="action-icon">👥</div>
-                    <h3>친구</h3>
-                    <p>친구들과 함께 운동하세요</p>
-                    <button class="btn btn-primary">친구 찾기</button>
-                </div>
+            <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <h3>소셜 기능</h3>
+                <p>친구들과 운동 기록을 공유하세요</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>채팅</h3>
+                <p>운동 친구들과 실시간 소통</p>
             </div>
         </div>
-    }
-    else
-    {
-        <div class="landing-section">
-            <div class="hero">
-                <h1 class="hero-title">
-                    <span class="emoji">🏋️</span>
-                    운동 기록의 시작
-                    <br/>
-                    <span class="highlight">FitnessPT</span>
-                </h1>
-                <p class="hero-subtitle">
-                    나만의 운동 일지를 기록하고<br/>
-                    친구들과 함께 성장하세요
-                </p>
-                <button class="btn btn-primary btn-lg" @onclick="GoToLogin">
-                    Google로 시작하기 →
-                </button>
-            </div>
-
-            <div class="features">
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>운동 기록 관리</h3>
-                    <p>매일의 운동을 쉽게 기록하고 관리하세요</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">📅</div>
-                    <h3>캘린더 뷰</h3>
-                    <p>한눈에 보는 나의 운동 이력</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">👥</div>
-                    <h3>소셜 기능</h3>
-                    <p>친구들과 운동 기록을 공유하세요</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">💬</div>
-                    <h3>채팅</h3>
-                    <p>운동 친구들과 실시간 소통</p>
-                </div>
-            </div>
-        </div>
-    }
+    </div>
 </div>
 
 @code {

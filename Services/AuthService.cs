@@ -1,10 +1,12 @@
 using FitnessPT.Models;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace FitnessPT.Services;
 
 public class AuthService
 {
     private readonly HttpClient client;
+    private readonly ProtectedSessionStorage sessionStorage; // 로그인 정보 저장용 세션
     private readonly ILogger<AuthService> logger;
     private readonly IConfiguration configuration;
 
@@ -12,11 +14,38 @@ public class AuthService
     public bool IsAuthenticated => CurrentUser != null;
     public event Action? OnAuthStateChanged;
 
-    public AuthService(HttpClient httpClient, ILogger<AuthService> log, IConfiguration config)
+    private bool initialized = false;
+    private const string USER_KEY = "fitness_user";
+
+    public AuthService(HttpClient httpClient, ProtectedSessionStorage session, ILogger<AuthService> log, IConfiguration config)
     {
         client = httpClient;
+        sessionStorage = session;
         logger = log;
         configuration = config;
+    }
+    
+    public async Task InitializeAsync()
+    {
+        try
+        {
+            var result = await sessionStorage.GetAsync<User>(USER_KEY);
+            
+            if (result.Success && result.Value != null)
+            {
+                CurrentUser = result.Value;
+                logger.LogInformation("세션에서 유저 정보 복원: {Email}", CurrentUser.Email);
+                OnAuthStateChanged?.Invoke();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "세션 복원 실패");
+        }
+        finally
+        {
+            initialized = true;
+        }
     }
 
     public async Task<GoogleAuthResult> LoginWithGoogleAsync(string googleToken)
@@ -31,6 +60,7 @@ public class AuthService
             if (result?.Success == true && result.User != null)
             {
                 CurrentUser = result.User;
+                sessionStorage.SetAsync(USER_KEY, result.User);
                 logger.LogInformation("로그인 성공: {Email}", result.User.Email);
                 OnAuthStateChanged?.Invoke();
                 
@@ -56,6 +86,7 @@ public class AuthService
     public Task LogoutAsync()
     {
         CurrentUser = null;
+        sessionStorage.SetAsync(USER_KEY, null);
         OnAuthStateChanged?.Invoke();
         return Task.CompletedTask;
     }

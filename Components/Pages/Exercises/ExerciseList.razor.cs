@@ -30,6 +30,17 @@ public partial class ExerciseList : ComponentBase
         await LoadExercises();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await AuthService.InitializeAsync();
+            
+            if(!AuthService.IsAuthenticated)
+                Navigation.NavigateTo("/", forceLoad: true);
+        }
+    }
+
     private async Task LoadExercises()
     {
         isLoading = true;

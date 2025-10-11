@@ -1,11 +1,15 @@
 @page "/exercises"
 @using FitnessPT.Services
 @using FitnessPT.Components.Modals
+@using FitnessPT.Components.Layout
 @inject ExerciseService ExerciseService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 
 <PageTitle>운동 관리 - FitnessPT</PageTitle>
+<NavMenu />
 
 <div class="exercises-container">
     <div class="page-header">
