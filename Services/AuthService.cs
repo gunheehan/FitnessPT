@@ -12,7 +12,7 @@ public class AuthService
 
     public User? CurrentUser { get; private set; }
     public bool IsAuthenticated => CurrentUser != null;
-    public event Action? OnAuthStateChanged;
+    public event Action<User>? OnAuthStateChanged;
 
     private bool initialized = false;
     private const string USER_KEY = "fitness_user";
@@ -35,7 +35,7 @@ public class AuthService
             {
                 CurrentUser = result.Value;
                 logger.LogInformation("세션에서 유저 정보 복원: {Email}", CurrentUser.Email);
-                OnAuthStateChanged?.Invoke();
+                OnAuthStateChanged?.Invoke(CurrentUser);
             }
         }
         catch (Exception ex)
@@ -62,7 +62,7 @@ public class AuthService
                 CurrentUser = result.User;
                 sessionStorage.SetAsync(USER_KEY, result.User);
                 logger.LogInformation("로그인 성공: {Email}", result.User.Email);
-                OnAuthStateChanged?.Invoke();
+                OnAuthStateChanged?.Invoke(CurrentUser);
                 
                 return result;
             }
@@ -87,7 +87,7 @@ public class AuthService
     {
         CurrentUser = null;
         sessionStorage.SetAsync(USER_KEY, null);
-        OnAuthStateChanged?.Invoke();
+        OnAuthStateChanged?.Invoke(CurrentUser);
         return Task.CompletedTask;
     }
 }

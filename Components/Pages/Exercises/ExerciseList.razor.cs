@@ -34,8 +34,6 @@ public partial class ExerciseList : ComponentBase
     {
         if (firstRender)
         {
-            await AuthService.InitializeAsync();
-            
             if(!AuthService.IsAuthenticated)
                 Navigation.NavigateTo("/", forceLoad: true);
         }

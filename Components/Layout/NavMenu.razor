@@ -1,4 +1,5 @@
-﻿@using FitnessPT.Services
+﻿@using FitnessPT.Models
+@using FitnessPT.Services
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 @implements IDisposable
@@ -9,10 +10,10 @@
             <a class="navbar-brand" href="/">🏋️ FitnessPT</a>
 
             <div class="navbar-nav ms-auto">
-                @if (AuthService.IsAuthenticated)
+                @if (user != null)
                 {
                     <span class="navbar-text me-3">
-                        👋 @AuthService.CurrentUser?.Name
+                        👋 @user.Name
                     </span>
                     <button class="btn btn-outline-danger btn-sm" @onclick="Logout">
                         로그아웃
@@ -30,20 +31,27 @@
 </div>
 
 @code {
+    private User? user;
+    
     protected override void OnInitialized()
     {
         // 이벤트 구독
         AuthService.OnAuthStateChanged += OnRefreshAccount;
     }
 
-    public void OnRefreshAccount()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // async 제거 - UI 업데이트만 하므로 동기로 충분
-        Console.WriteLine($"Auth State Changed: {AuthService.IsAuthenticated}");
-        if (AuthService.CurrentUser != null)
+        if (firstRender)
         {
-            Console.WriteLine($"User: {AuthService.CurrentUser.Name}");
+            await AuthService.InitializeAsync();
         }
+    }
+
+    public void OnRefreshAccount(User? _user)
+    {
+        Console.WriteLine("####### User Data Get");
+        Console.WriteLine("####### User Name " + _user.Name);
+        user = _user;
         
         // UI 업데이트
         InvokeAsync(StateHasChanged);
