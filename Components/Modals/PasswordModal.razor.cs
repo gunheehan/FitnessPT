@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace FitnessPT.Components.Modals;
 
-public partial class AdminModal : ComponentBase
+public partial class PasswordModal : ComponentBase
 {
     private readonly string Pin = "0305";
     [Parameter] public EventCallback OnAuthenticated { get; set; } // 검증 성공 시 호출
