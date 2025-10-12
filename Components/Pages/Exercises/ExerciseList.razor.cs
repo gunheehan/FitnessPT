@@ -24,21 +24,10 @@ public partial class ExerciseList : ComponentBase
     private int pageSize = 12;
     private int totalPages = 1;
     private int totalCount = 0;
-
+    
     protected override async Task OnInitializedAsync()
     {
         await LoadExercises();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await AuthService.InitializeAsync();
-
-            if(!AuthService.IsAuthenticated)
-                Navigation.NavigateTo("/", forceLoad: true);
-        }
     }
 
     private async Task LoadExercises()

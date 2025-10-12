@@ -3,6 +3,7 @@
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 @implements IDisposable
+@rendermode InteractiveServer
 
 <div class="nav-menu">
     <nav class="navbar navbar-expand-lg navbar-light">
@@ -35,7 +36,6 @@
     
     protected override async Task OnInitializedAsync()
     {
-        // 이벤트 구독
         AuthService.OnAuthStateChanged += OnRefreshAccount;
     }
     
@@ -50,11 +50,7 @@
     
     public void OnRefreshAccount(User? _user)
     {
-        Console.WriteLine("####### User Data Get");
-        Console.WriteLine("####### User Name " + _user.Name);
         user = _user;
-        
-        // UI 업데이트
         InvokeAsync(StateHasChanged);
     }
 
@@ -66,7 +62,6 @@
 
     public void Dispose()
     {
-        // 올바른 메서드 제거
         AuthService.OnAuthStateChanged -= OnRefreshAccount;
     }
 }

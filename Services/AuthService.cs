@@ -6,18 +6,23 @@ namespace FitnessPT.Services;
 public class AuthService
 {
     private readonly HttpClient client;
-    private readonly ProtectedSessionStorage sessionStorage; // 로그인 정보 저장용 세션
+    private readonly ProtectedSessionStorage sessionStorage;
     private readonly ILogger<AuthService> logger;
     private readonly IConfiguration configuration;
 
     public User? CurrentUser { get; private set; }
     public bool IsAuthenticated => CurrentUser != null;
-    public event Action<User>? OnAuthStateChanged;
+    
+    public event Action<User?>? OnAuthStateChanged;
 
     private bool initialized = false;
     private const string USER_KEY = "fitness_user";
 
-    public AuthService(HttpClient httpClient, ProtectedSessionStorage session, ILogger<AuthService> log, IConfiguration config)
+    public AuthService(
+        HttpClient httpClient, 
+        ProtectedSessionStorage session, 
+        ILogger<AuthService> log, 
+        IConfiguration config)
     {
         client = httpClient;
         sessionStorage = session;
@@ -27,20 +32,27 @@ public class AuthService
     
     public async Task InitializeAsync()
     {
+        if (initialized)
+            return;
+        
         try
         {
+            // 세션 정보 불러오기
             var result = await sessionStorage.GetAsync<User>(USER_KEY);
             
             if (result.Success && result.Value != null)
             {
                 CurrentUser = result.Value;
-                logger.LogInformation("세션에서 유저 정보 복원: {Email}", CurrentUser.Email);
                 OnAuthStateChanged?.Invoke(CurrentUser);
+            }
+            else
+            {
+                OnAuthStateChanged?.Invoke(null);
             }
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "세션 복원 실패");
+            logger.LogError(ex, "Session Replace failed");
         }
         finally
         {
@@ -52,30 +64,43 @@ public class AuthService
     {
         try
         {
+            logger.LogInformation("Start Goole Login");
+
             var apiUrl = configuration["FITNESSPT:ApiSettings:BaseUrl"];
             var request = new GoogleAuthRequest { GoogleToken = googleToken };
+            
             var response = await client.PostAsJsonAsync($"{apiUrl}/api/GoogleAuth/login", request);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                return new GoogleAuthResult
+                {
+                    Success = false,
+                    ErrorMessage = $"API 오류: {response.StatusCode}"
+                };
+            }
+            
             var result = await response.Content.ReadFromJsonAsync<GoogleAuthResult>();
 
             if (result?.Success == true && result.User != null)
             {
                 CurrentUser = result.User;
-                sessionStorage.SetAsync(USER_KEY, result.User);
-                logger.LogInformation("로그인 성공: {Email}", result.User.Email);
+                
+                // 세션 스토리지 저장
+                await sessionStorage.SetAsync(USER_KEY, result.User);
                 OnAuthStateChanged?.Invoke(CurrentUser);
                 
                 return result;
             }
 
-            return new GoogleAuthResult()
+            return new GoogleAuthResult
             {
                 Success = false,
-                ErrorMessage = "No Signer"
+                ErrorMessage = "인증 정보가 올바르지 않습니다"
             };
         }
         catch (Exception e)
         {
-            logger.LogError(e, "로그인 실패");
             return new GoogleAuthResult 
             { 
                 Success = false, 
@@ -83,11 +108,23 @@ public class AuthService
             };
         }
     }
-    public Task LogoutAsync()
+    
+    public async Task LogoutAsync()
     {
-        CurrentUser = null;
-        sessionStorage.SetAsync(USER_KEY, null);
-        OnAuthStateChanged?.Invoke(CurrentUser);
-        return Task.CompletedTask;
+        try
+        {
+            logger.LogInformation("Start Logout");
+
+            CurrentUser = null;
+            
+            // 세션 스토리지 삭제
+            await sessionStorage.DeleteAsync(USER_KEY);
+            
+            OnAuthStateChanged?.Invoke(null);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Logout Error");
+        }
     }
 }
