@@ -1,11 +1,10 @@
 using FitnessPT.Components;
-using FitnessPT.Components.Layout;
+using FitnessPT.Components.Pages.Exercises;
 using FitnessPT.Services;
 using FitnessPT.Services.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// .NET 8 Blazor Web App 서비스 추가
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 var apiBaseUrl = builder.Configuration["FITNESSPT:ApiSettings:BaseUrl"] 
@@ -15,9 +14,10 @@ builder.Services.AddScoped(sp => new HttpClient
 { 
     BaseAddress = new Uri(apiBaseUrl)
 });
-builder.Services.AddScoped<IApiClient, ApiClient>();
-builder.Services.AddScoped<ExerciseService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ExerciseController>();
+builder.Services.AddScoped<IApiClient, ApiClient>();
+builder.Services.AddScoped<IExerciseService, ExerciseService>();
 
 var app = builder.Build();
 
@@ -32,11 +32,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-// .NET 8 Blazor Web App을 위한 라우팅 설정
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// 포트 설정
 app.Urls.Add("http://0.0.0.0:5100");
 
 app.Run();

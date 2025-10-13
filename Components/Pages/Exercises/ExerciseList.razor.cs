@@ -1,6 +1,5 @@
 using FitnessPT.Dtos;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 
 namespace FitnessPT.Components.Pages.Exercises;
 
@@ -8,23 +7,23 @@ public partial class ExerciseList : ComponentBase
 {
     private List<ExerciseDto>? exercises;
     private ExerciseDto selectedExercise = new();
-    
+
     private string searchTerm = "";
     private string selectedLevel = "";
     private string selectedCategory = "";
-    
+
     private bool isLoading = false;
     private bool showModal = false;
     private bool showAuth = false;
     private bool isAuth = false;
     private bool isEditMode = false;
     private string? errorMessage = null;
-    
+
     private int currentPage = 1;
     private int pageSize = 12;
     private int totalPages = 1;
     private int totalCount = 0;
-    
+
     protected override async Task OnInitializedAsync()
     {
         await LoadExercises();
@@ -38,26 +37,20 @@ public partial class ExerciseList : ComponentBase
 
         try
         {
-            var result = await ExerciseService.GetExercisesAsync(
-                page: currentPage,
-                pageSize: pageSize,
-                level: selectedLevel,
-                category: selectedCategory
+            var result = await Controller.LoadExercisesAsync(
+                currentPage,
+                pageSize,
+                selectedLevel,
+                selectedCategory
             );
 
             exercises = result.Items;
             totalCount = result.TotalCount;
             totalPages = result.TotalPages;
         }
-        catch (HttpRequestException ex)
-        {
-            errorMessage = $"서버 연결 실패: {ex.Message}";
-            Console.Error.WriteLine($"API Error: {ex}");
-        }
         catch (Exception ex)
         {
             errorMessage = $"오류 발생: {ex.Message}";
-            Console.Error.WriteLine($"Error: {ex}");
         }
         finally
         {
@@ -66,19 +59,80 @@ public partial class ExerciseList : ComponentBase
         }
     }
 
-    #region Modal
-
-    private void OpenAuthModal()
+    // 필터 변경
+    private async Task ApplyFilters()
     {
-        showAuth = false;
-        isAuth = true;
+        currentPage = 1;
+        await LoadExercises();
     }
 
+    // 필터 초기화
+    private async Task ClearFilters()
+    {
+        searchTerm = "";
+        selectedLevel = "";
+        selectedCategory = "";
+        currentPage = 1;
+        await LoadExercises();
+    }
+
+    // 페이지 전환
+    private async Task ChangePage(int page)
+    {
+        currentPage = page;
+        await LoadExercises();
+    }
+
+    private async Task SaveExercise(ExerciseDto exercise)
+    {
+        bool success = isEditMode
+            ? await Controller.UpdateExerciseAsync(exercise.Id, exercise)
+            : await Controller.CreateExerciseAsync(exercise);
+
+        if (success)
+        {
+            CloseEditModal();
+            await LoadExercises();
+        }
+    }
+
+    private async Task DeleteExercise(int id)
+    {
+        if (!isAuth)
+        {
+            showAuth = true;
+            return;
+        }
+
+        bool success = await Controller.DeleteExerciseAsync(id);
+
+        if (success)
+        {
+            if (exercises?.Count == 1 && currentPage > 1)
+            {
+                currentPage--;
+            }
+
+            await LoadExercises();
+        }
+    }
+
+    #region Modal 관련 메서드
+
+    // 관리자 인증 성공
+    private void OpenAuthModal()
+    {
+        isAuth = true;
+        showAuth = false;
+    }
+
+    // 관리자 인증 모달 닫기
     private void CloseAuthModal()
     {
         showAuth = false;
     }
-    
+
+    // 생성 모달 열기
     private void OpenCreateModal()
     {
         selectedExercise = new ExerciseDto();
@@ -89,6 +143,7 @@ public partial class ExerciseList : ComponentBase
             showAuth = true;
     }
 
+    // 수정 모달 열기
     private void OpenEditModal(ExerciseDto exercise)
     {
         selectedExercise = new ExerciseDto
@@ -104,60 +159,12 @@ public partial class ExerciseList : ComponentBase
         };
         isEditMode = true;
         showModal = true;
+
         if (!isAuth)
             showAuth = true;
     }
-    
-    private async Task SaveExercise(ExerciseDto exercise)
-    {
-        try
-        {
-            if (isEditMode)
-            {
-                var updateDto = new ExerciseDto
-                {
-                    Name = exercise.Name,
-                    Description = exercise.Description,
-                    Level = exercise.Level,
-                    Category = exercise.Category,
-                    CategoryDetail = exercise.CategoryDetail,
-                    ImageUrl = exercise.ImageUrl,
-                    VideoUrl = exercise.VideoUrl
-                };
 
-                await ExerciseService.UpdateExerciseAsync(exercise.Id, updateDto);
-                await JS.InvokeVoidAsync("alert", "운동이 수정되었습니다!");
-            }
-            else
-            {
-                var createDto = new ExerciseDto
-                {
-                    Name = exercise.Name,
-                    Description = exercise.Description,
-                    Level = exercise.Level,
-                    Category = exercise.Category,
-                    CategoryDetail = exercise.CategoryDetail,
-                    ImageUrl = exercise.ImageUrl,
-                    VideoUrl = exercise.VideoUrl
-                };
-
-                await ExerciseService.CreateExerciseAsync(createDto);
-                await JS.InvokeVoidAsync("alert", "운동이 추가되었습니다!");
-            }
-
-            CloseEditModal();
-            await LoadExercises();
-        }
-        catch (HttpRequestException ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"서버 연결 실패: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"저장 실패: {ex.Message}");
-        }
-    }
-
+    // 수정 모달 닫기
     private void CloseEditModal()
     {
         showModal = false;
@@ -165,69 +172,4 @@ public partial class ExerciseList : ComponentBase
     }
 
     #endregion
-    
-    private async Task SearchExercises()
-    {
-        currentPage = 1;
-        await LoadExercises();
-    }
-
-    private async Task ApplyFilters()
-    {
-        currentPage = 1;
-        await LoadExercises();
-    }
-
-    private async Task ClearFilters()
-    {
-        searchTerm = "";
-        selectedLevel = "";
-        selectedCategory = "";
-        currentPage = 1;
-        await LoadExercises();
-    }
-
-    private async Task ChangePage(int page)
-    {
-        currentPage = page;
-        await LoadExercises();
-        
-        // 페이지 상단으로 스크롤
-        await JS.InvokeVoidAsync("window.scrollTo", 0, 0);
-    }
-
-    private async Task DeleteExercise(int id)
-    {
-        if (!isAuth)
-        {
-            showAuth = true;
-            return;
-        }
-        var confirmed = await JS.InvokeAsync<bool>("confirm", "정말 삭제하시겠습니까?");
-        
-        if (confirmed)
-        {
-            try
-            {
-                await ExerciseService.DeleteExerciseAsync(id);
-                await JS.InvokeVoidAsync("alert", "운동이 삭제되었습니다!");
-                
-                // 현재 페이지에 아이템이 없으면 이전 페이지로
-                if (exercises?.Count == 1 && currentPage > 1)
-                {
-                    currentPage--;
-                }
-                
-                await LoadExercises();
-            }
-            catch (HttpRequestException ex)
-            {
-                await JS.InvokeVoidAsync("alert", $"서버 연결 실패: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                await JS.InvokeVoidAsync("alert", $"삭제 실패: {ex.Message}");
-            }
-        }
-    }
 }

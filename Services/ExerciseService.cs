@@ -4,7 +4,24 @@ using FitnessPT.Services.Http;
 
 namespace FitnessPT.Services;
 
-public class ExerciseService
+public interface IExerciseService
+{
+    Task<PagedResult<ExerciseDto>> GetExercisesAsync(
+        int page, 
+        int pageSize, 
+        string level = "", 
+        string category = "");
+    
+    Task<ExerciseDto?> GetExerciseByIdAsync(int id);
+    
+    Task<ExerciseDto> CreateExerciseAsync(ExerciseDto exercise);
+    
+    Task UpdateExerciseAsync(int id, ExerciseDto exercise);
+    
+    Task DeleteExerciseAsync(int id);
+}
+
+public class ExerciseService : IExerciseService
 {
     private readonly IApiClient apiClient;
     private const string Endpoint = "api/exercises";
@@ -14,12 +31,7 @@ public class ExerciseService
         apiClient = _apiClient;
     }
 
-    public async Task<PagedResult<ExerciseDto>> GetExercisesAsync(
-        int page = 1,
-        int pageSize = 20,
-        string? searchTerm = null,
-        string? level = null,
-        string? category = null)
+    public async Task<PagedResult<ExerciseDto>> GetExercisesAsync(int page, int pageSize, string level = "", string category = "")
     {
         var queryParams = new Dictionary<string, string>
         {
@@ -59,6 +71,11 @@ public class ExerciseService
             return response.Data;
 
         throw new Exception(response.ErrorMessage ?? "운동 생성 실패");
+    }
+
+    Task IExerciseService.UpdateExerciseAsync(int id, ExerciseDto exercise)
+    {
+        return UpdateExerciseAsync(id, exercise);
     }
 
     public async Task<ExerciseDto> UpdateExerciseAsync(int id, ExerciseDto dto)

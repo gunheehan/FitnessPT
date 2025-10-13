@@ -1,8 +1,6 @@
 @page "/exercises"
-@using FitnessPT.Services
 @using FitnessPT.Components.Modals
-@inject ExerciseService ExerciseService
-@inject IJSRuntime JS
+@inject ExerciseController Controller
 @rendermode InteractiveServer
 
 <PageTitle>운동 관리 - FitnessPT</PageTitle>
@@ -77,7 +75,7 @@
         <div class="exercises-grid">
             @foreach (var exercise in exercises)
             {
-                <ExerciseCard 
+                <ExerciseCard
                     Exercise="exercise"
                     OnEdit="() => OpenEditModal(exercise)"
                     OnDelete="() => DeleteExercise(exercise.Id)" />
@@ -88,7 +86,7 @@
         @if (totalPages > 1)
         {
             <div class="pagination">
-                <button class="btn btn-page" 
+                <button class="btn btn-page"
                         disabled="@(currentPage == 1)"
                         @onclick="() => ChangePage(currentPage - 1)">
                     ← 이전
@@ -98,7 +96,7 @@
                     @currentPage / @totalPages 페이지 (총 @totalCount 개)
                 </span>
 
-                <button class="btn btn-page" 
+                <button class="btn btn-page"
                         disabled="@(currentPage == totalPages)"
                         @onclick="() => ChangePage(currentPage + 1)">
                     다음 →
@@ -110,19 +108,19 @@
     <!-- 관리자 인증 모달 -->
     @if (showAuth)
     {
-    <PasswordModal
-        OnAuthenticated="OpenAuthModal"
-        OnClose="CloseAuthModal" />
+        <PasswordModal
+            OnAuthenticated="OpenAuthModal"
+            OnClose="CloseAuthModal" />
     }
 
     <!-- 추가/수정 모달 -->
     @if (showModal && isAuth)
     {
-        <ExerciseModal 
+        <ExerciseModal
             Exercise="selectedExercise"
             IsEdit="isEditMode"
             OnSave="SaveExercise"
             OnClose="CloseEditModal" />
     }
-    
+
 </div>
