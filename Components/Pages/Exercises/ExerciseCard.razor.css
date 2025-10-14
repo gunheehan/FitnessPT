@@ -1,15 +1,13 @@
-/* 카드 기본 */
+/* ExerciseCard 컴포넌트 전용 스타일 */
+
 .exercise-card {
     background: white;
-    border-radius: 14px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    max-width: 400px;
-    margin: 0 auto;
 }
 
 .exercise-card:hover {
@@ -37,17 +35,6 @@
     transform: scale(1.05);
 }
 
-.card-placeholder {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.placeholder-icon {
-    font-size: 3.5rem;
-}
-
 /* 레벨 배지 */
 .badge-level {
     position: absolute;
@@ -57,10 +44,11 @@
     border-radius: 16px;
     font-size: 0.75rem;
     font-weight: 700;
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(6px);
 }
 
-/* 본문 */
+/* 카드 본문 */
 .card-body {
     padding: 18px;
     display: flex;
@@ -92,6 +80,8 @@
     font-size: 0.75rem;
     font-weight: 600;
     white-space: nowrap;
+    background: #e0e7ff;
+    color: #3730a3;
 }
 
 .exercise-desc {
@@ -154,10 +144,6 @@
 
 /* 반응형 */
 @media (max-width: 768px) {
-    .exercise-card {
-        max-width: 100%;
-    }
-
     .card-image-wrapper {
         height: 170px;
     }
