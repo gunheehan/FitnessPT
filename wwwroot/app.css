@@ -42,7 +42,6 @@
 /* 메인 레이아웃 */
 .page {
     display: flex;
-    flex-direction: column;
     min-height: 100vh;
 }
 
