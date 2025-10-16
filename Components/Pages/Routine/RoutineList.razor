@@ -1,6 +1,38 @@
 @page "/routine"
-<h3>RoutineList</h3>
+@using FitnessPT.Components.Shared
+
+<div class="routine-container">
+    <div class="page-header">
+        <div class="page-title">운동 루틴</div>
+        <button class="create-button">새 루틴 추가</button>
+    </div>
+</div>
+
+<CategoryFillter
+    @bind-SelectedLevel="selectedLevel"
+    @bind-SelectedCategory="selectedCategory"
+    OnFiltersChanged="ApplyFilters" />
 
 @code {
-    
+    private string selectedLevel = "";
+    private string selectedCategory = "";
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadExercises();
+    }
+
+    private async Task ApplyFilters()
+    {
+        Console.WriteLine($"필터 적용 - 레벨: {selectedLevel}, 카테고리: {selectedCategory}");
+        await LoadExercises();
+    }
+
+    private async Task LoadExercises()
+    {
+        isLoading = true;
+        Console.WriteLine($"데이터 로드 중 - 레벨: {selectedLevel}, 카테고리: {selectedCategory}");
+        isLoading = false;
+    }
 }
