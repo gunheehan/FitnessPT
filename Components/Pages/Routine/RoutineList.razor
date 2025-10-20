@@ -1,27 +1,50 @@
 @page "/routine"
 @using FitnessPT.Components.Shared
+@using FitnessPT.Dtos
 
 @rendermode InteractiveServer
 
 <div class="routine-container">
-    <div class="page-header">
-        <div class="page-title">운동 루틴</div>
-        <button class="create-button">새 루틴 추가</button>
+    <div class="routine-header">
+        <div class="page-header">
+            <div class="page-title">운동 루틴</div>
+            <button class="create-button">+
+            </button>
+        </div>
+        <CategoryFillter
+            @bind-SelectedLevel="selectedLevel"
+            @bind-SelectedCategory="selectedCategory"
+            OnFiltersChanged="ApplyFilters" />
+    </div>
+    <div class="routine-grid-container">
+        <RoutineCard Routine="routineData"/>
+        <RoutineCard Routine="routineData"/>
+        <RoutineCard Routine="routineData"/>
+        <RoutineCard Routine="routineData"/>
+        <RoutineCard Routine="routineData"/>
     </div>
 </div>
 
-<CategoryFillter
-    @bind-SelectedLevel="selectedLevel"
-    @bind-SelectedCategory="selectedCategory"
-    OnFiltersChanged="ApplyFilters" />
+
 
 @code {
     private string selectedLevel = "";
     private string selectedCategory = "";
     private bool isLoading = true;
+    RoutineDto routineData;
 
     protected override async Task OnInitializedAsync()
     {
+        routineData = new RoutineDto()
+        {
+            Category = "upper_body",
+            Level = "beginner",
+            Description = "테스트 데모 데이터",
+            EstimatedDuration = 60,
+            Name = "상체 박살 루틴",
+            ThumbnailUrl = null,
+            Id = 1
+        };
         await LoadExercises();
     }
 

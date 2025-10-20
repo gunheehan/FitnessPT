@@ -1,44 +1,8 @@
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
-}
-
 .modal-header h2 {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
     color: #1a1a1a;
-}
-
-.btn-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #6b7280;
-    padding: 0.5rem;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    transition: all 0.2s;
-}
-
-.btn-close:hover {
-    background: #f3f4f6;
-    color: #1a1a1a;
-}
-
-.modal-body {
-    padding: 1.5rem;
-    overflow-y: auto;
-    flex: 1;
 }
 
 .form-group {
@@ -51,10 +15,6 @@
     font-weight: 600;
     color: #374151;
     font-size: 0.875rem;
-}
-
-.required {
-    color: #ef4444;
 }
 
 .form-control,
@@ -143,10 +103,6 @@ textarea.form-control {
 
 /* 반응형 */
 @media (max-width: 768px) {
-    .modal-content {
-        max-height: 95vh;
-    }
-
     .form-row {
         grid-template-columns: 1fr;
     }

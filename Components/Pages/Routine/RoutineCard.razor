@@ -1,5 +1,47 @@
-<h3>RoutineCard</h3>
+@using FitnessPT.Dtos
 
-@code {
-    
+
+<div class="rouine-card">
+    <div class="card-image-wrapper">
+        <div class="card-image" style="background-image: url('./img/gym_girl.png')"></div>
+    </div>
+    <div class="card-body">
+        <div class="routine-title">@Routine.Name</div>
+        <div class="routine-title">소요시간: @Routine.EstimatedDuration H</div>
+        <div class="badget-category-container">
+            <div class="badge-category">@GetCategoryText()</div>
+        </div>
+    </div>
+</div>
+
+@code{
+
+    [Parameter, EditorRequired] public RoutineDto Routine { get; set; } = null;
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private string GetLevelText()
+    {
+        return Routine.Level switch
+        {
+            "beginner" => "초급",
+            "intermediate" => "중급",
+            "advanced" => "고급",
+            _ => Routine.Level ?? ""
+        };
+    }
+
+    private string GetCategoryText()
+    {
+        return Routine.Category?.ToLower() switch
+        {
+            "upper_body" => "상체",
+            "lower_body" => "하체",
+            "core" => "코어",
+            "cardio" => "유산소",
+            "full_body" => "전신",
+            _ => Routine.Category ?? ""
+        };
+    }
+
 }
