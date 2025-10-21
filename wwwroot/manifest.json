@@ -42,27 +42,21 @@
       "src": "icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png"
-    },
-    {
-      "src": "icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
     }
   ],
-  "categories": ["fitness", "health", "productivity"],
   "screenshots": [
     {
-      "src": "screenshots/mobile-screenshot.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIwIDEwODAiPjxyZWN0IHdpZHRoPSIxOTIwIiBoZWlnaHQ9IjEwODAiIGZpbGw9IiM0ZjQ2ZTUiLz48dGV4dCB4PSI5NjAiIHk9IjU0MCIgZm9udC1zaXplPSIxMDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIj5GaXRuZXNzUFQgLSDsl7Drj5nsnITsp4A8L3RleHQ+PC9zdmc+",
+      "sizes": "1920x1080",
+      "type": "image/svg+xml",
+      "form_factor": "wide"
     },
     {
-      "src": "screenshots/desktop-screenshot.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide"
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzOTAgODQ0Ij48cmVjdCB3aWR0aD0iMzkwIiBoZWlnaHQ9Ijg0NCIgZmlsbD0iIzRmNDZlNSIvPjx0ZXh0IHg9IjE5NSIgeT0iNDIyIiBmb250LXNpemU9IjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+Rml0bmVzc1BUPC90ZXh0Pjwvc3ZnPg==",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
     }
-  ]
+  ],
+  "categories": ["fitness", "health", "productivity"]
 }

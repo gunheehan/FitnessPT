@@ -1,77 +1,90 @@
-const CACHE_NAME = 'fitnesspt-v1.0.0';
-const urlsToCache = [
+const CACHE_NAME = 'fitnesspt-ssr-v1.0.0';
+
+// SSR 앱용 캐시 전략
+const STATIC_CACHE = [
     '/',
+    '/about',
+    '/exercises',
     '/css/site.css',
     '/js/site.js',
     '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png',
-    // 필요한 정적 파일들 추가
 ];
 
-// 서비스 워커 설치
+// 캐시 우선 전략 (정적 콘텐츠)
+const CACHE_FIRST = [
+    /\.css$/,
+    /\.js$/,
+    /\.png$/,
+    /\.jpg$/,
+    /\.gif$/,
+    /\.svg$/,
+];
+
+// 네트워크 우선 전략 (동적 콘텐츠)
+const NETWORK_FIRST = [
+    /\/api\//,
+    /\/_blazor\//,
+    /\/chat/,
+];
+
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('캐시 열림');
-                return cache.addAll(urlsToCache);
-            })
+            .then(cache => cache.addAll(STATIC_CACHE))
     );
 });
 
-// 캐시된 리소스 제공
 self.addEventListener('fetch', event => {
+    const url = new URL(event.request.url);
+
     // Blazor SignalR 연결은 캐시하지 않음
-    if (event.request.url.includes('/_blazor') ||
-        event.request.url.includes('/negotiate')) {
+    if (url.pathname.includes('/_blazor') ||
+        url.pathname.includes('/negotiate')) {
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                // 캐시에 있으면 캐시에서 반환
-                if (response) {
-                    return response;
-                }
+    // 정적 리소스: 캐시 우선
+    if (CACHE_FIRST.some(pattern => pattern.test(url.pathname))) {
+        event.respondWith(cacheFirst(event.request));
+        return;
+    }
 
-                // 네트워크 요청
-                return fetch(event.request)
-                    .then(response => {
-                        // 유효한 응답인지 확인
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
+    // 동적 콘텐츠: 네트워크 우선
+    if (NETWORK_FIRST.some(pattern => pattern.test(url.pathname))) {
+        event.respondWith(networkFirst(event.request));
+        return;
+    }
 
-                        // 응답 복사 후 캐시에 저장
-                        const responseToCache = response.clone();
-                        caches.open(CACHE_NAME)
-                            .then(cache => {
-                                cache.put(event.request, responseToCache);
-                            });
-
-                        return response;
-                    })
-                    .catch(() => {
-                        // 오프라인일 때 기본 페이지 반환
-                        return caches.match('/');
-                    });
-            })
-    );
+    // 기본: 네트워크 우선, 오프라인 시 캐시
+    event.respondWith(networkFirst(event.request));
 });
 
-// 캐시 업데이트
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('오래된 캐시 삭제:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
-    );
-});
+async function cacheFirst(request) {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    try {
+        const response = await fetch(request);
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, response.clone());
+        return response;
+    } catch {
+        return new Response('오프라인 상태입니다', { status: 503 });
+    }
+}
+
+async function networkFirst(request) {
+    try {
+        const response = await fetch(request);
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, response.clone());
+        return response;
+    } catch {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+
+        // 오프라인 페이지 반환
+        return caches.match('/offline.html') ||
+            new Response('오프라인 상태입니다', { status: 503 });
+    }
+}
