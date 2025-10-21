@@ -17,6 +17,7 @@
         <Folder Include="Components\Auth\" />
         <Folder Include="Components\Layout\" />
         <Folder Include="Models\GoogleAuth\" />
+        <Folder Include="wwwroot\icons\" />
         <Folder Include="wwwroot\img\" />
     </ItemGroup>
 

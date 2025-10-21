@@ -35,6 +35,8 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+app.MapFallbackToPage("/_Host");
+
 app.Urls.Add("http://0.0.0.0:5100");
 
 app.Run();
