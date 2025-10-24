@@ -4,8 +4,7 @@
 
 ## 🌐 라이브 데모
 
-- **메인 페이지**: [http://redhorse.iptime.org:6002](http://redhorse.iptime.org:6002)
-- **운동 관리**: [http://redhorse.iptime.org:6002/exercises](http://redhorse.iptime.org:6002/exercises)
+- **메인 페이지**: [FitnessPT](https://fitnesspt.lifemate.kr)
 
 ## 📋 주요 기능
 
