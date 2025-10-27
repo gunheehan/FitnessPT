@@ -1,6 +1,7 @@
 @page "/routine"
 @using FitnessPT.Components.Shared
 @using FitnessPT.Dtos
+@using FitnessPT.Components.Modals
 
 @rendermode InteractiveServer
 
@@ -8,7 +9,7 @@
     <div class="routine-header">
         <div class="page-header">
             <div class="page-title">운동 루틴</div>
-            <button class="create-button">+
+            <button class="create-button" @onclick="OpenCreateModal">+
             </button>
         </div>
         <CategoryFillter
@@ -25,13 +26,27 @@
     </div>
 </div>
 
+@if (showModal)
+{
+    <RoutineModal
+        Routine="selectedRoutine"
+        IsEdit="isEditMode"
+        OnSave="SaveRoutine"
+        OnClose="CloseModal"
+        />
+}
+
 
 
 @code {
     private string selectedLevel = "";
     private string selectedCategory = "";
     private bool isLoading = true;
+    private bool isEditMode = false;
+    private bool showModal = false;
+    
     RoutineDto routineData;
+    RoutineDto selectedRoutine;
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,4 +75,23 @@
         Console.WriteLine($"데이터 로드 중 - 레벨: {selectedLevel}, 카테고리: {selectedCategory}");
         isLoading = false;
     }
+
+    private void OpenCreateModal()
+    {
+        selectedRoutine = new RoutineDto();
+        isEditMode = false;
+        showModal = true;
+        Console.WriteLine("OnClick Modal Open");
+    }
+
+    private void SaveRoutine(RoutineInfoDto obj)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
 }

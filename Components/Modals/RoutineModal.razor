@@ -28,13 +28,41 @@
             </div>
             <div class="form-row">
                 <CategoryFillter
-                    @bind-SelectedLevel="selectedLevel"
-                    @bind-SelectedCategory="selectedCategory"
+                    isEdit = "true"
+                    @bind-SelectedLevel="Routine.Level"
+                    @bind-SelectedCategory="Routine.Category"
                     OnFiltersChanged="ApplyFilters" />
             </div>
-            
-            <div class="form-row">
-                <button class="modal-button">추가</button>
+
+            <div class="form-group">
+                <label>이미지 URL</label>
+                <input type="url"
+                       class="form-control"
+                       @bind="Routine.ThumbnailUrl"
+                       placeholder="https://example.com/image.jpg" />
+                @if (!string.IsNullOrEmpty(Routine.ThumbnailUrl))
+                {
+                    <div class="image-preview">
+                        <img src="@Routine.ThumbnailUrl" alt="미리보기" />
+                    </div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label>운동 종목</label>
+                <ExerciseSelecter
+                    OnSelectExercise="AddExercise"/>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="OnClose">
+                    취소
+                </button>
+                <button class="btn btn-primary"
+                        @onclick="HandleSave"
+                        disabled="@(!IsValid())">
+                    @(IsEdit ? "수정" : "추가")
+                </button>
             </div>
         </div>
     </div>
@@ -48,23 +76,69 @@
     public bool IsEdit { get; set; }
     
     [Parameter]
-    public EventCallback<RoutineDto> OnSave { get; set; }
+    public EventCallback<RoutineInfoDto> OnSave { get; set; }
     
     [Parameter]
     public EventCallback OnClose { get; set; }
-    
-    private string selectedLevel = "";
-    private string selectedCategory = "";
 
-    private List<string> exerciseList;
+    private List<RoutineExerciseDto> exerciseList;
 
     protected override async Task OnInitializedAsync()
     {
-        exerciseList = new List<string>();
+        exerciseList = new List<RoutineExerciseDto>();
     }
 
     private async Task ApplyFilters()
     {
-        Console.WriteLine($"필터 적용 - 레벨: {selectedLevel}, 카테고리: {selectedCategory}");
+        Console.WriteLine($"필터 적용 - 레벨: {Routine.Level}, 카테고리: {Routine.Category}");
     }
+    
+    private bool IsValid()
+    {
+        return !string.IsNullOrWhiteSpace(Routine.Name) &&
+               !string.IsNullOrWhiteSpace(Routine.Level) &&
+               !string.IsNullOrWhiteSpace(Routine.Category);
+    }
+
+    private async Task HandleSave()
+    {
+        if (IsValid())
+        {
+            RoutineInfoDto newInfo = new RoutineInfoDto();
+            await OnSave.InvokeAsync(newInfo);
+        }
+    }
+    
+    private void AddExercise(ExerciseDto exercise)
+    {
+        var newExercise = new RoutineExerciseDto
+        {
+            RoutineId = Routine.Id,
+            ExerciseId = exercise.Id,
+            OrderIndex = exerciseList.Count + 1,
+            Sets = 3,
+            Reps = 12,
+            RestSeconds = 60
+        };
+        
+        exerciseList.Add(newExercise);
+        StateHasChanged();
+    }
+
+    private void RemoveExercise(int index)
+    {
+        if (index >= 0 && index < exerciseList.Count)
+        {
+            exerciseList.RemoveAt(index);
+            
+            // 순서 재정렬
+            for (int i = 0; i < exerciseList.Count; i++)
+            {
+                exerciseList[i].OrderIndex = i + 1;
+            }
+            
+            StateHasChanged();
+        }
+    }
+
 }
