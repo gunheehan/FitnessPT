@@ -24,7 +24,7 @@ public interface IExerciseService
 public class ExerciseService : IExerciseService
 {
     private readonly IApiClient apiClient;
-    private const string Endpoint = "api/exercises";
+    private const string Endpoint = "/api/exercises";
 
     public ExerciseService(IApiClient _apiClient)
     {
