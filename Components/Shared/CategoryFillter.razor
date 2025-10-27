@@ -4,33 +4,42 @@
 <div class="search-section">
     <div class="filters">
         <select class="form-select" @bind="SelectedLevel" @bind:after="OnFilterChanged">
-            <option value="">모든 레벨</option>
+            @if (!isEdit)
+            {
+                <option value="">모든 레벨</option>
+            }
             <option value="beginner">초급</option>
             <option value="intermediate">중급</option>
             <option value="advanced">고급</option>
         </select>
 
         <select class="form-select" @bind="SelectedCategory" @bind:after="OnFilterChanged">
-            <option value="">모든 카테고리</option>
+            @if (!isEdit)
+            {
+                <option value="">모든 카테고리</option>
+            }
             <option value="upper_body">상체</option>
             <option value="lower_body">하체</option>
             <option value="core">코어</option>
             <option value="cardio">유산소</option>
             <option value="full_body">전신</option>
         </select>
-
-        @if (!string.IsNullOrEmpty(SelectedLevel) || !string.IsNullOrEmpty(SelectedCategory))
-        {
-            <button class="btn btn-secondary" @onclick="HandleClearFilters">
-                ✖ 초기화
-            </button>
-        }
+        <!--초기화 버튼-->
+        @* @if (!string.IsNullOrEmpty(SelectedLevel) || !string.IsNullOrEmpty(SelectedCategory)) *@
+        @* { *@
+        @*     <button class="btn btn-secondary" style="max-width: 100px" @onclick="HandleClearFilters"> *@
+        @*         Reset *@
+        @*     </button> *@
+        @* } *@
     </div>
 </div>
 
 @code {
     private string selectedLevel = "";
     private string selectedCategory = "";
+    
+    [Parameter]
+    public bool isEdit { get; set; }
 
     [Parameter]
     public string SelectedLevel
