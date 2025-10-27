@@ -115,10 +115,6 @@
     .exercises-grid {
         grid-template-columns: 1fr;
     }
-
-    .filters {
-        flex-direction: column;
-    }
 }
 
 @media (min-width: 1080px) {
