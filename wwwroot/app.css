@@ -233,11 +233,22 @@
     width: 100vw;
     height: 100vh;
     background-color: rgba(0,0,0,0.5);
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 10;
     animation: modalfadeIn 0.2s ease-in-out;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-overlay.disabled {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .modal-content{

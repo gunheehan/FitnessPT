@@ -6,8 +6,9 @@ namespace FitnessPT.Components.Modals;
 public partial class PasswordModal : ComponentBase
 {
     private readonly string Pin = "0305";
-    [Parameter] public EventCallback OnAuthenticated { get; set; } // 검증 성공 시 호출
-    [Parameter] public EventCallback OnClose { get; set; } // 모달 닫기
+    [Parameter] public EventCallback<bool> OnAuthenticated { get; set; } // 검증 성공 시 호출
+    [Parameter] public bool IsActive { get; set; }
+    [Parameter] public EventCallback<bool> IsActiveChanged { get; set; }
 
     private string[] pinInputs = new string[4]; // 각 입력 칸에 입력된 PIN 값 저장
     private bool invalidPin = false; // 초기값은 false로 설정
@@ -19,11 +20,6 @@ public partial class PasswordModal : ComponentBase
     private string submitText;
     private string errorMessage;
     
-    private void CloseModal(MouseEventArgs e)
-    {
-        Console.WriteLine("Close Call");
-        OnClose.InvokeAsync();
-    }
     protected override void OnInitialized()
     {
         for (int i = 0; i < pinInputs.Length; i++)
@@ -40,9 +36,15 @@ public partial class PasswordModal : ComponentBase
     {
         if (firstRender)
         {
+            Console.WriteLine("인증 모달 상태 : " + IsActive);
             // 첫 번째 입력 필드에 포커스
             await pinElements[0].FocusAsync();
         }
+    }
+    
+    private async Task CloseModal()
+    {
+        await IsActiveChanged.InvokeAsync(false);
     }
 
     private async Task OnInputChanged(ChangeEventArgs e, int boxIndex)
@@ -113,13 +115,13 @@ public partial class PasswordModal : ComponentBase
             if (!invalidPin)
             {
                 OnAuthenticated.InvokeAsync(true); // 인증 성공 시 이벤트 호출
+                CloseModal();
             }
             else
             {
                 errorMessage = "비밀번호가 일치하지 않습니다.";
             }
         }
-
         StateHasChanged(); // 상태 변경 반영
     }
 }

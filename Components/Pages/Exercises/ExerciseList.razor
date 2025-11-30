@@ -106,21 +106,17 @@
     }
 
     <!-- 관리자 인증 모달 -->
-    @if (showAuth)
-    {
-        <PasswordModal
-            OnAuthenticated="OpenAuthModal"
-            OnClose="CloseAuthModal" />
-    }
+    <PasswordModal
+        OnAuthenticated="OpenAuthModal"
+        IsActive="activeAuthModal"
+        IsActiveChanged="(value) => activeAuthModal = value"/>
 
     <!-- 추가/수정 모달 -->
-    @if (showModal && isAuth)
-    {
-        <ExerciseModal
-            Exercise="selectedExercise"
-            IsEdit="isEditMode"
-            OnSave="SaveExercise"
-            OnClose="CloseEditModal" />
-    }
+    <ExerciseModal
+        Exercise="selectedExercise"
+        IsActive="activeEditModal"
+        IsEdit="isEditMode"
+        OnSave="SaveExercise"
+        IsActiveChanged="(value) => activeEditModal = value"/>
 
 </div>
