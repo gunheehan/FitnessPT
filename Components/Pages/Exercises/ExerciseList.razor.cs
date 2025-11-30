@@ -13,11 +13,12 @@ public partial class ExerciseList : ComponentBase
     private string selectedCategory = "";
 
     private bool isLoading = false;
-    private bool showModal = false;
-    private bool showAuth = false;
-    private bool isAuth = false;
     private bool isEditMode = false;
     private string? errorMessage = null;
+
+    private bool activeEditModal = false;
+    private bool activeAuthModal = false;
+    private bool isAuthSession = false;
 
     private int currentPage = 1;
     private int pageSize = 12;
@@ -91,16 +92,15 @@ public partial class ExerciseList : ComponentBase
 
         if (success)
         {
-            CloseEditModal();
             await LoadExercises();
         }
     }
 
     private async Task DeleteExercise(int id)
     {
-        if (!isAuth)
+        if (!isAuthSession)
         {
-            showAuth = true;
+            activeAuthModal = true;
             return;
         }
 
@@ -120,32 +120,40 @@ public partial class ExerciseList : ComponentBase
     #region Modal 관련 메서드
 
     // 관리자 인증 성공
-    private void OpenAuthModal()
+    private void OpenAuthModal(bool isAuth)
     {
-        isAuth = true;
-        showAuth = false;
+        Console.WriteLine("인증 성공 : " + isAuth);
+        isAuthSession = isAuth;
     }
 
-    // 관리자 인증 모달 닫기
-    private void CloseAuthModal()
+    private bool CheckAndShowAuth()
     {
-        showAuth = false;
+        if (!isAuthSession)
+        {
+            activeAuthModal = true;
+            return false;
+        }
+
+        return true;
     }
 
     // 생성 모달 열기
     private void OpenCreateModal()
     {
+        if (!CheckAndShowAuth()) return;
+        
         selectedExercise = new ExerciseDto();
         isEditMode = false;
-        showModal = true;
-
-        if (!isAuth)
-            showAuth = true;
+        activeEditModal = true;
     }
 
     // 수정 모달 열기
     private void OpenEditModal(ExerciseDto exercise)
     {
+        Console.WriteLine("수정버튼 눌림");
+        if (!CheckAndShowAuth()) return;
+        Console.WriteLine("수정 모달 오픈");
+
         selectedExercise = new ExerciseDto
         {
             Id = exercise.Id,
@@ -158,17 +166,7 @@ public partial class ExerciseList : ComponentBase
             VideoUrl = exercise.VideoUrl
         };
         isEditMode = true;
-        showModal = true;
-
-        if (!isAuth)
-            showAuth = true;
-    }
-
-    // 수정 모달 닫기
-    private void CloseEditModal()
-    {
-        showModal = false;
-        selectedExercise = new();
+        activeEditModal = true;
     }
 
     #endregion
