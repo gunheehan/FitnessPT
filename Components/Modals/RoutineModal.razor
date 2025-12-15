@@ -3,7 +3,7 @@
 
 @rendermode InteractiveServer
 
-<div class="modal-overlay" @onclick="OnClose">
+<div class="modal-overlay @(IsActive ? "active" : "disabled")" @onclick="OnClose">
     <div class="modal-content" @onclick:stopPropagation>
         <div class="modal-header">
             <h2>@(IsEdit ? "✏️ 루틴 수정" : "➕ 새 루틴 추가")</h2>
@@ -72,14 +72,14 @@
     [Parameter, EditorRequired]
     public RoutineDto Routine { get; set; } = new();
     
-    [Parameter]
-    public bool IsEdit { get; set; }
+    [Parameter] public bool IsActive { get; set; }
     
-    [Parameter]
-    public EventCallback<RoutineInfoDto> OnSave { get; set; }
+    [Parameter] public bool IsEdit { get; set; }
     
-    [Parameter]
-    public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<RoutineInfoDto> OnSave { get; set; }
+    
+    [Parameter] public EventCallback<bool> IsActiveChanged { get; set; }
+
 
     private List<RoutineExerciseDto> exerciseList;
 
@@ -139,6 +139,11 @@
             
             StateHasChanged();
         }
+    }
+
+    private void OnClose()
+    {
+        IsActiveChanged.InvokeAsync(false);
     }
 
 }

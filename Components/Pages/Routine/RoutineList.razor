@@ -26,15 +26,12 @@
     </div>
 </div>
 
-@if (showModal)
-{
-    <RoutineModal
-        Routine="selectedRoutine"
-        IsEdit="isEditMode"
-        OnSave="SaveRoutine"
-        OnClose="CloseModal"
-        />
-}
+<RoutineModal
+    Routine="selectedRoutine"
+    IsActive="showModal"
+    IsEdit="isEditMode"
+    OnSave="SaveRoutine"
+    IsActiveChanged="(value) => showModal = value"/>
 
 
 
@@ -46,7 +43,7 @@
     private bool showModal = false;
     
     RoutineDto routineData;
-    RoutineDto selectedRoutine;
+    RoutineDto selectedRoutine = new RoutineDto();
 
     protected override async Task OnInitializedAsync()
     {
@@ -86,12 +83,6 @@
 
     private void SaveRoutine(RoutineInfoDto obj)
     {
-        throw new NotImplementedException();
+        Console.WriteLine("OnClick Save Routine");
     }
-
-    private void CloseModal()
-    {
-        showModal = false;
-    }
-
 }
