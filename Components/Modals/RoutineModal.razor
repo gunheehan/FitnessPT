@@ -26,7 +26,8 @@
                           rows="3"
                           placeholder="운동에 대한 설명을 입력하세요"></textarea>
             </div>
-            <div class="form-row">
+            <div class="form-group">
+                <label>루틴 분류</label>
                 <CategoryFillter
                     isEdit = "true"
                     @bind-SelectedLevel="Routine.Level"
@@ -53,20 +54,21 @@
                 <ExerciseSelecter
                     OnSelectExercise="AddExercise"/>
             </div>
-
-            <div class="modal-footer">
-                <button class="btn btn-secondary" @onclick="OnClose">
-                    취소
-                </button>
-                <button class="btn btn-primary"
-                        @onclick="HandleSave"
-                        disabled="@(!IsValid())">
-                    @(IsEdit ? "수정" : "추가")
-                </button>
-            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" @onclick="OnClose">
+                취소
+            </button>
+            <button class="btn btn-primary"
+                    @onclick="HandleSave"
+                    disabled="@(!IsValid())">
+                @(IsEdit ? "수정" : "추가")
+            </button>
         </div>
     </div>
 </div>
+
+<link href="~/css/modal-common.css" rel="stylesheet" />
 
 @code {
     [Parameter, EditorRequired]

@@ -6,13 +6,11 @@
 @namespace FitnessPT.Components.Shared
 
 <dic class="search-section">
-    <div class="form-row">
-        <CategoryFillter
-            isEdit = "true"
-            @bind-SelectedLevel="level"
-            @bind-SelectedCategory="category"
-            OnFiltersChanged="ApplyFilters" />
-    </div>
+    <CategoryFillter
+        isEdit = "true"
+        @bind-SelectedLevel="level"
+        @bind-SelectedCategory="category"
+        OnFiltersChanged="ApplyFilters" />
     <div class="form-row">
         <div class="filters">
             @if (exerciseDP?.Any() == true)

@@ -5,10 +5,6 @@
     color: #1a1a1a;
 }
 
-.form-group {
-    margin-bottom: 1.25rem;
-}
-
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
@@ -44,7 +40,14 @@ textarea.form-control {
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
 }
 
 .image-preview {

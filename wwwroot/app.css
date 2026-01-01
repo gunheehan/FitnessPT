@@ -274,6 +274,9 @@
     padding: 1.5rem;
     overflow-y: auto;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .btn-close {
