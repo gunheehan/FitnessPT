@@ -9,7 +9,7 @@
             <h2>@(IsEdit ? "✏️ 루틴 수정" : "➕ 새 루틴 추가")</h2>
             <button class="btn-close" @onclick="OnClose">✖</button>
         </div>
-        
+
         <div class="modal-body">
             <div class="form-group">
                 <label>루틴 이름 <span class="required">*</span></label>
@@ -26,10 +26,11 @@
                           rows="3"
                           placeholder="운동에 대한 설명을 입력하세요"></textarea>
             </div>
+
             <div class="form-group">
                 <label>루틴 분류</label>
                 <CategoryFillter
-                    isEdit = "true"
+                    isEdit="true"
                     @bind-SelectedLevel="Routine.Level"
                     @bind-SelectedCategory="Routine.Category"
                     OnFiltersChanged="ApplyFilters" />
@@ -43,18 +44,75 @@
                        placeholder="https://example.com/image.jpg" />
                 @if (!string.IsNullOrEmpty(Routine.ThumbnailUrl))
                 {
-                    <div class="image-preview">
-                        <img src="@Routine.ThumbnailUrl" alt="미리보기" />
-                    </div>
+                <div class="image-preview">
+                    <img src="@Routine.ThumbnailUrl" alt="미리보기" />
+                </div>
                 }
             </div>
 
             <div class="form-group">
-                <label>운동 종목</label>
-                <ExerciseSelecter
-                    OnSelectExercise="AddExercise"/>
+                <label>운동 종목 추가</label>
+                <ExerciseSelecter OnSelectExercise="AddExercise"/>
             </div>
+
+            @* ⭐ 선택된 운동 목록 *@
+            @if (exerciseList.Any())
+            {
+            <div class="form-group">
+                <label>선택된 운동 목록 (@exerciseList.Count 개)</label>
+                <div class="exercise-list">
+                    @foreach (var (exercise, index) in exerciseList.Select((e, i) => (e, i)))
+                    {
+                    <div class="exercise-item">
+                        <div class="exercise-header">
+                            <span class="order-badge">@exercise.OrderIndex</span>
+                            <h4>@exercise.ExerciseName</h4>
+                            <button class="btn-remove" @onclick="() => RemoveExercise(index)">
+                                🗑️
+                            </button>
+                        </div>
+
+                        <div class="exercise-inputs">
+                            <div class="input-group">
+                                <label>세트</label>
+                                <input type="number"
+                                       min="1"
+                                       @bind="exercise.Sets"
+                                       class="form-control-sm" />
+                            </div>
+
+                            <div class="input-group">
+                                <label>반복</label>
+                                <input type="number"
+                                       min="1"
+                                       @bind="exercise.Reps"
+                                       class="form-control-sm" />
+                            </div>
+
+                            <div class="input-group">
+                                <label>운동 시간(초)</label>
+                                <input type="number"
+                                       min="0"
+                                       @bind="exercise.DurationSeconds"
+                                       class="form-control-sm"
+                                       placeholder="선택" />
+                            </div>
+
+                            <div class="input-group">
+                                <label>휴식(초)</label>
+                                <input type="number"
+                                       min="0"
+                                       @bind="exercise.RestSeconds"
+                                       class="form-control-sm" />
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
         </div>
+
         <div class="modal-footer">
             <button class="btn btn-secondary" @onclick="OnClose">
                 취소
@@ -70,20 +128,109 @@
 
 <link href="~/css/modal-common.css" rel="stylesheet" />
 
+<style>
+    /* 선택된 운동 목록 스타일 */
+    .exercise-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .exercise-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        background-color: #f9fafb;
+    }
+
+    .exercise-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .order-badge {
+        background-color: #3b82f6;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .exercise-header h4 {
+        margin: 0;
+        flex: 1;
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .btn-remove {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .btn-remove:hover {
+        background-color: #fee2e2;
+    }
+
+    .exercise-inputs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .input-group label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #6b7280;
+    }
+
+    .form-control-sm {
+        padding: 6px 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .form-control-sm:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+</style>
+
 @code {
-    [Parameter, EditorRequired]
-    public RoutineDto Routine { get; set; } = new();
-    
+    [Parameter, EditorRequired] public RoutineDto Routine { get; set; } = new();
+
     [Parameter] public bool IsActive { get; set; }
-    
+
     [Parameter] public bool IsEdit { get; set; }
-    
+
     [Parameter] public EventCallback<RoutineInfoDto> OnSave { get; set; }
-    
+
     [Parameter] public EventCallback<bool> IsActiveChanged { get; set; }
 
-
-    private List<RoutineExerciseDto> exerciseList;
+    private List<RoutineExerciseDto> exerciseList = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -94,35 +241,52 @@
     {
         Console.WriteLine($"필터 적용 - 레벨: {Routine.Level}, 카테고리: {Routine.Category}");
     }
-    
+
     private bool IsValid()
     {
         return !string.IsNullOrWhiteSpace(Routine.Name) &&
                !string.IsNullOrWhiteSpace(Routine.Level) &&
-               !string.IsNullOrWhiteSpace(Routine.Category);
+               !string.IsNullOrWhiteSpace(Routine.Category) &&
+               exerciseList.Any(); // 운동 1개 이상 필수
     }
 
     private async Task HandleSave()
     {
         if (IsValid())
         {
-            RoutineInfoDto newInfo = new RoutineInfoDto();
+            var newInfo = new RoutineInfoDto
+            {
+                Name = Routine.Name,
+                Level = Routine.Level,
+                Category = Routine.Category,
+                ExerciseInfo = exerciseList
+            };
+
             await OnSave.InvokeAsync(newInfo);
         }
     }
-    
+
     private void AddExercise(ExerciseDto exercise)
     {
+// 중복 체크
+        if (exerciseList.Any(e => e.ExerciseId == exercise.Id))
+        {
+            Console.WriteLine("이미 추가된 운동입니다.");
+            return;
+        }
+
         var newExercise = new RoutineExerciseDto
         {
             RoutineId = Routine.Id,
             ExerciseId = exercise.Id,
+            ExerciseName = exercise.Name,
             OrderIndex = exerciseList.Count + 1,
             Sets = 3,
             Reps = 12,
+            DurationSeconds = null, // 선택적
             RestSeconds = 60
         };
-        
+
         exerciseList.Add(newExercise);
         StateHasChanged();
     }
@@ -132,13 +296,13 @@
         if (index >= 0 && index < exerciseList.Count)
         {
             exerciseList.RemoveAt(index);
-            
-            // 순서 재정렬
+
+// 순서 재정렬
             for (int i = 0; i < exerciseList.Count; i++)
             {
                 exerciseList[i].OrderIndex = i + 1;
             }
-            
+
             StateHasChanged();
         }
     }

@@ -29,7 +29,7 @@ public class RoutineExerciseDto
     /// 루틴 내 운동 순서
     /// </summary>
     public int OrderIndex { get; set; }
-
+    
     /// <summary>
     /// 세트 수
     /// </summary>
@@ -49,6 +49,11 @@ public class RoutineExerciseDto
     /// 세트 간 휴식(초)
     /// </summary>
     public int? RestSeconds { get; set; }
+    
+    /// <summary>
+    /// 운동 이름
+    /// </summary>
+    public string ExerciseName { get; set; }
 }
 
 public class RoutineInfoDto
