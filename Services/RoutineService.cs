@@ -6,7 +6,7 @@ namespace FitnessPT.Services;
 
 public interface IRoutineService
 {
-    Task<PagedResult<RoutineInfoDto>> GetRoutineAsync(
+    Task<PagedResult<RoutineDto>> GetRoutineAsync(
         int page,
         int pageSize,
         string level = "",
@@ -26,7 +26,7 @@ public class RoutineService : IRoutineService
     {
         apiClient = _apiClient;
     }
-    public async Task<PagedResult<RoutineInfoDto>> GetRoutineAsync(int page, int pageSize, string level = "", string category = "")
+    public async Task<PagedResult<RoutineDto>> GetRoutineAsync(int page, int pageSize, string level = "", string category = "")
     {
         var queryParams = new Dictionary<string, string>
         {
@@ -40,7 +40,7 @@ public class RoutineService : IRoutineService
         if (!string.IsNullOrEmpty(category))
             queryParams["category"] = category;
 
-        var response = await apiClient.GetAsync<PagedResult<RoutineInfoDto>>(Endpoint, queryParams);
+        var response = await apiClient.GetAsync<PagedResult<RoutineDto>>(Endpoint, queryParams);
 
         if (response.IsSuccess && response.Data != null)
             return response.Data;
