@@ -18,6 +18,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ExerciseController>();
 builder.Services.AddScoped<IApiClient, ApiClient>();
 builder.Services.AddScoped<IExerciseService, ExerciseService>();
+builder.Services.AddScoped<AlertService>();
 
 var app = builder.Build();
 

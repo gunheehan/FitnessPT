@@ -1,0 +1,31 @@
+@page "/test-alert"
+@using FitnessPT.Services
+@inject AlertService Alert
+
+<h3>Alert 테스트</h3>
+
+<button @onclick="TestAlert">Alert 테스트</button>
+<button @onclick="TestConfirm">Confirm 테스트</button>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("테스트 페이지 로드됨");
+    }
+
+    private void TestAlert()
+    {
+        Console.WriteLine("TestAlert 호출");
+        Alert.ShowSuccess("성공!");
+    }
+
+    private void TestConfirm()
+    {
+        Console.WriteLine("TestConfirm 호출");
+        Alert.Confirm(
+            message: "테스트 메시지",
+            onConfirm: () => Console.WriteLine("확인 클릭됨"),
+            onCancel: () => Console.WriteLine("취소 클릭됨")
+        );
+    }
+}
