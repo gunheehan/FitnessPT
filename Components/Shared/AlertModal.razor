@@ -1,10 +1,8 @@
 @namespace FitnessPT.Components.Shared
 @using FitnessPT.Services
-@using FitnessPT.Models
 @inject AlertService AlertService
 @implements IDisposable
 
-<!-- ⭐ 항상 DOM에 존재, CSS로 표시/숨김 제어 -->
 <div class="modal-overlay @(alertState.IsVisible ? "active" : "")" @onclick="HandleOverlayClick">
     <div class="alert-modal" @onclick:stopPropagation>
         <div class="alert-icon">
