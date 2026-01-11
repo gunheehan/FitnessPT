@@ -3,7 +3,7 @@ using FitnessPT.Models;
 using FitnessPT.Services;
 using Microsoft.JSInterop;
 
-namespace FitnessPT.Components.Pages.Routine;
+namespace FitnessPT.Components.Controllers;
 
 public class RoutineController
 {

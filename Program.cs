@@ -1,5 +1,5 @@
 using FitnessPT.Components;
-using FitnessPT.Components.Pages.Exercises;
+using FitnessPT.Components.Controllers;
 using FitnessPT.Services;
 using FitnessPT.Services.Http;
 
@@ -16,6 +16,7 @@ builder.Services.AddScoped(sp => new HttpClient
 });
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ExerciseController>();
+builder.Services.AddScoped<RoutineController>();
 builder.Services.AddScoped<IApiClient, ApiClient>();
 builder.Services.AddScoped<IExerciseService, ExerciseService>();
 builder.Services.AddScoped<AlertService>();
