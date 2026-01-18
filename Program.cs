@@ -2,6 +2,7 @@ using FitnessPT.Components;
 using FitnessPT.Components.Controllers;
 using FitnessPT.Services;
 using FitnessPT.Services.Http;
+using ISession = FitnessPT.Services.ISession;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddScoped<RoutineController>();
 builder.Services.AddScoped<IApiClient, ApiClient>();
 builder.Services.AddScoped<IExerciseService, ExerciseService>();
 builder.Services.AddScoped<IRoutineService, RoutineService>();
+builder.Services.AddScoped<ISession, SessionService>();
 builder.Services.AddScoped<AlertService>();
 
 var app = builder.Build();

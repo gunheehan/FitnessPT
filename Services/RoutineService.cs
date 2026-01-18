@@ -20,11 +20,13 @@ public interface IRoutineService
 public class RoutineService : IRoutineService
 {
     private readonly IApiClient apiClient;
+    private readonly ISession session;
     private const string Endpoint = "/api/routine";
 
-    public RoutineService(IApiClient _apiClient)
+    public RoutineService(IApiClient _apiClient, ISession _session)
     {
         apiClient = _apiClient;
+        session = _session;
     }
     public async Task<PagedResult<RoutineDto>> GetRoutineAsync(int page, int pageSize, string level = "", string category = "")
     {
