@@ -19,11 +19,13 @@
             OnFiltersChanged="ApplyFilters" />
     </div>
     <div class="routine-grid-container">
-        <RoutineCard Routine="routineData"/>
-        <RoutineCard Routine="routineData"/>
-        <RoutineCard Routine="routineData"/>
-        <RoutineCard Routine="routineData"/>
-        <RoutineCard Routine="routineData"/>
+        @if (routineList != null)
+        {
+            foreach (var routineData in routineList)
+            {
+                <RoutineCard Routine="routineData"/>
+            }
+        }
     </div>
 </div>
 
@@ -33,9 +35,3 @@
     IsEdit="isEditMode"
     OnSave="SaveRoutine"
     IsActiveChanged="(value) => showModal = value"/>
-
-
-
-@code {
-    
-}

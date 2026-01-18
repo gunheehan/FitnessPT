@@ -31,7 +31,8 @@ public class RoutineService : IRoutineService
         var queryParams = new Dictionary<string, string>
         {
             { "page", page.ToString() },
-            { "pageSize", pageSize.ToString() }
+            { "pageSize", pageSize.ToString() },
+            { "userid", "1" }
         };
 
         if (!string.IsNullOrEmpty(level))

@@ -11,21 +11,11 @@ public partial class RoutineList : ComponentBase
     private bool isEditMode = false;
     private bool showModal = false;
     
-    RoutineDto routineData;
+    private List<RoutineDto> routineList;
     RoutineDto selectedRoutine = new RoutineDto();
 
     protected override async Task OnInitializedAsync()
     {
-        routineData = new RoutineDto()
-        {
-            Category = "upper_body",
-            Level = "beginner",
-            Description = "테스트 데모 데이터",
-            EstimatedDuration = 60,
-            Name = "상체 박살 루틴",
-            ThumbnailUrl = null,
-            Id = 1
-        };
         await LoadExercises();
     }
 
@@ -39,6 +29,8 @@ public partial class RoutineList : ComponentBase
     {
         isLoading = true;
         Console.WriteLine($"데이터 로드 중 - 레벨: {selectedLevel}, 카테고리: {selectedCategory}");
+        var routines = await Controller.LoadRoutinesAsync(1, 12, selectedLevel, selectedCategory);
+        routineList = routines.Items;
         isLoading = false;
     }
 
