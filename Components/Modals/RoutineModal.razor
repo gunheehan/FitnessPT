@@ -1,13 +1,36 @@
+@using FitnessPT.Components.Controllers
 @using FitnessPT.Dtos
 @using FitnessPT.Components.Shared
+@inject RoutineController Controller
 
 @rendermode InteractiveServer
 
 <div class="modal-overlay @(IsActive ? "active" : "disabled")" @onclick="OnClose">
-    <div class="modal-content" @onclick:stopPropagation>
+    <div class="modal-content @(IsViewMode ? "view-mode" : "")" @onclick:stopPropagation>
         <div class="modal-header">
-            <h2>@(IsEdit ? "✏️ 루틴 수정" : "➕ 새 루틴 추가")</h2>
-            <button class="btn-close" @onclick="OnClose">✖</button>
+            <h2>
+                @if (IsViewMode)
+                {
+                    <span>👁️ 루틴 미리보기</span>
+                }
+                else if (IsEdit)
+                {
+                    <span>✏️ 루틴 수정</span>
+                }
+                else
+                {
+                    <span>➕ 새 루틴 추가</span>
+                }
+            </h2>
+            <div class="header-actions">
+                @if (IsViewMode)
+                {
+                    <button class="btn btn-edit" @onclick="SwitchToEditMode">
+                        ✏️ 수정하기
+                    </button>
+                }
+                <button class="btn-close" @onclick="OnClose">✖</button>
+            </div>
         </div>
 
         <div class="modal-body">
@@ -16,7 +39,8 @@
                 <input type="text"
                        class="form-control"
                        @bind="Routine.Name"
-                       placeholder="예: 상체 박살 루틴"/>
+                       placeholder="예: 상체 박살 루틴"
+                       disabled="@IsViewMode"/>
             </div>
 
             <div class="form-group">
@@ -24,16 +48,27 @@
                 <textarea class="form-control"
                           @bind="Routine.Description"
                           rows="3"
-                          placeholder="운동에 대한 설명을 입력하세요"></textarea>
+                          placeholder="운동에 대한 설명을 입력하세요"
+                          disabled="@IsViewMode"></textarea>
             </div>
 
             <div class="form-group">
                 <label>루틴 분류</label>
-                <CategoryFillter
-                    isEdit="true"
-                    @bind-SelectedLevel="Routine.Level"
-                    @bind-SelectedCategory="Routine.Category"
-                    OnFiltersChanged="ApplyFilters" />
+                @if (IsViewMode)
+                {
+                    <div class="view-badges">
+                        <span class="badge-view level">@GetLevelText()</span>
+                        <span class="badge-view category">@GetCategoryText()</span>
+                    </div>
+                }
+                else
+                {
+                    <CategoryFillter
+                        isEdit="true"
+                        @bind-SelectedLevel="Routine.Level"
+                        @bind-SelectedCategory="Routine.Category"
+                        OnFiltersChanged="ApplyFilters" />
+                }
             </div>
 
             <div class="form-group">
@@ -41,87 +76,107 @@
                 <input type="url"
                        class="form-control"
                        @bind="Routine.ThumbnailUrl"
-                       placeholder="https://example.com/image.jpg" />
+                       placeholder="https://example.com/image.jpg"
+                       disabled="@IsViewMode" />
                 @if (!string.IsNullOrEmpty(Routine.ThumbnailUrl))
                 {
-                <div class="image-preview">
-                    <img src="@Routine.ThumbnailUrl" alt="미리보기" />
-                </div>
+                    <div class="image-preview">
+                        <img src="@Routine.ThumbnailUrl" alt="미리보기" />
+                    </div>
                 }
             </div>
 
-            <div class="form-group">
-                <label>운동 종목 추가</label>
-                <ExerciseSelecter OnSelectExercise="AddExercise"/>
-            </div>
+            @if (!IsViewMode)
+            {
+                <div class="form-group">
+                    <label>운동 종목 추가</label>
+                    <ExerciseSelecter OnSelectExercise="AddExercise"/>
+                </div>
+            }
 
-            @* ⭐ 선택된 운동 목록 *@
+            @* 선택된 운동 목록 *@
             @if (exerciseList.Any())
             {
-            <div class="form-group">
-                <label>선택된 운동 목록 (@exerciseList.Count 개)</label>
-                <div class="exercise-list">
-                    @foreach (var (exercise, index) in exerciseList.Select((e, i) => (e, i)))
-                    {
-                    <div class="exercise-item">
-                        <div class="exercise-header">
-                            <span class="order-badge">@exercise.OrderIndex</span>
-                            <h4>@exercise.ExerciseName</h4>
-                            <button class="btn-remove" @onclick="() => RemoveExercise(index)">
-                                🗑️
-                            </button>
-                        </div>
+                <div class="form-group">
+                    <label>선택된 운동 목록 (@exerciseList.Count 개)</label>
+                    <div class="exercise-list">
+                        @foreach (var (exercise, index) in exerciseList.Select((e, i) => (e, i)))
+                        {
+                            <div class="exercise-item">
+                                <div class="exercise-header">
+                                    <span class="order-badge">@exercise.OrderIndex</span>
+                                    <h4>@exercise.ExerciseName</h4>
+                                    @if (!IsViewMode)
+                                    {
+                                        <button class="btn-remove" @onclick="() => RemoveExercise(index)">
+                                            🗑️
+                                        </button>
+                                    }
+                                </div>
 
-                        <div class="exercise-inputs">
-                            <div class="input-group">
-                                <label>세트</label>
-                                <input type="number"
-                                       min="1"
-                                       @bind="exercise.Sets"
-                                       class="form-control-sm" />
-                            </div>
+                                <div class="exercise-inputs">
+                                    <div class="input-group">
+                                        <label>세트</label>
+                                        <input type="number"
+                                               min="1"
+                                               @bind="exercise.Sets"
+                                               class="form-control-sm"
+                                               disabled="@IsViewMode" />
+                                    </div>
 
-                            <div class="input-group">
-                                <label>반복</label>
-                                <input type="number"
-                                       min="1"
-                                       @bind="exercise.Reps"
-                                       class="form-control-sm" />
-                            </div>
+                                    <div class="input-group">
+                                        <label>반복</label>
+                                        <input type="number"
+                                               min="1"
+                                               @bind="exercise.Reps"
+                                               class="form-control-sm"
+                                               disabled="@IsViewMode" />
+                                    </div>
 
-                            <div class="input-group">
-                                <label>운동 시간(초)</label>
-                                <input type="number"
-                                       min="0"
-                                       @bind="exercise.DurationSeconds"
-                                       class="form-control-sm"
-                                       placeholder="선택" />
-                            </div>
+                                    <div class="input-group">
+                                        <label>운동 시간(초)</label>
+                                        <input type="number"
+                                               min="0"
+                                               @bind="exercise.DurationSeconds"
+                                               class="form-control-sm"
+                                               placeholder="선택"
+                                               disabled="@IsViewMode" />
+                                    </div>
 
-                            <div class="input-group">
-                                <label>휴식(초)</label>
-                                <input type="number"
-                                       min="0"
-                                       @bind="exercise.RestSeconds"
-                                       class="form-control-sm" />
+                                    <div class="input-group">
+                                        <label>휴식(초)</label>
+                                        <input type="number"
+                                               min="0"
+                                               @bind="exercise.RestSeconds"
+                                               class="form-control-sm"
+                                               disabled="@IsViewMode" />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        }
                     </div>
-                    }
                 </div>
-            </div>
             }
         </div>
 
         <div class="modal-footer">
-            <button class="btn btn-secondary" @onclick="OnClose">
-                취소
-            </button>
-            <button class="btn btn-primary"
-                    @onclick="HandleSave"
-                    disabled="@(!IsValid())">
-                @(IsEdit ? "수정" : "추가")
-            </button>
+            @if (IsViewMode)
+            {
+                <button class="btn btn-secondary" @onclick="OnClose">
+                    닫기
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-secondary" @onclick="OnClose">
+                    취소
+                </button>
+                <button class="btn btn-primary"
+                        @onclick="HandleSave"
+                        disabled="@(!IsValid())">
+                    @(IsEdit ? "수정" : "추가")
+                </button>
+            }
         </div>
     </div>
 </div>
@@ -129,7 +184,62 @@
 <link href="~/css/modal-common.css" rel="stylesheet" />
 
 <style>
-    /* 선택된 운동 목록 스타일 */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn-edit {
+        padding: 8px 16px;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+
+    .btn-edit:hover {
+        background-color: #2563eb;
+    }
+
+    /* 미리보기 모드 스타일 */
+    .view-mode .form-control:disabled,
+    .view-mode .form-control-sm:disabled {
+        background-color: #f9fafb;
+        cursor: not-allowed;
+        opacity: 1;
+        color: #111827;
+    }
+
+    .view-badges {
+        display: flex;
+        gap: 8px;
+        padding: 10px;
+        background-color: #f9fafb;
+        border-radius: 8px;
+    }
+
+    .badge-view {
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .badge-view.level {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+
+    .badge-view.category {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    /* 기존 스타일들 */
     .exercise-list {
         display: flex;
         flex-direction: column;
@@ -217,24 +327,50 @@
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
+
+    .image-preview {
+        margin-top: 12px;
+        border-radius: 8px;
+        overflow: hidden;
+        max-height: 300px;
+    }
+
+    .image-preview img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
 </style>
 
 @code {
     [Parameter, EditorRequired] public RoutineDto Routine { get; set; } = new();
-
     [Parameter] public bool IsActive { get; set; }
-
     [Parameter] public bool IsEdit { get; set; }
-
+    [Parameter] public bool IsViewMode { get; set; } // 미리보기 모드
     [Parameter] public EventCallback<RoutineInfoDto> OnSave { get; set; }
-
     [Parameter] public EventCallback<bool> IsActiveChanged { get; set; }
 
     private List<RoutineExerciseDto> exerciseList = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        exerciseList = new List<RoutineExerciseDto>();
+        // Routine이 변경될 때마다 운동 목록 로드
+        if (Routine?.Id > 0 && (IsEdit || IsViewMode))
+        {
+            var result = await Controller.GetRoutineDetail(Routine.Id);
+            exerciseList = result.ExerciseInfo;
+        }
+        else if (!IsEdit && !IsViewMode)
+        {
+            exerciseList = new List<RoutineExerciseDto>();
+        }
+    }
+
+    private void SwitchToEditMode()
+    {
+        IsViewMode = false;
+        IsEdit = true;
+        StateHasChanged();
     }
 
     private async Task ApplyFilters()
@@ -247,7 +383,7 @@
         return !string.IsNullOrWhiteSpace(Routine.Name) &&
                !string.IsNullOrWhiteSpace(Routine.Level) &&
                !string.IsNullOrWhiteSpace(Routine.Category) &&
-               exerciseList.Any(); // 운동 1개 이상 필수
+               exerciseList.Any();
     }
 
     private async Task HandleSave()
@@ -268,7 +404,6 @@
 
     private void AddExercise(ExerciseDto exercise)
     {
-// 중복 체크
         if (exerciseList.Any(e => e.ExerciseId == exercise.Id))
         {
             Console.WriteLine("이미 추가된 운동입니다.");
@@ -283,7 +418,7 @@
             OrderIndex = exerciseList.Count + 1,
             Sets = 3,
             Reps = 12,
-            DurationSeconds = null, // 선택적
+            DurationSeconds = null,
             RestSeconds = 60
         };
 
@@ -297,7 +432,6 @@
         {
             exerciseList.RemoveAt(index);
 
-// 순서 재정렬
             for (int i = 0; i < exerciseList.Count; i++)
             {
                 exerciseList[i].OrderIndex = i + 1;
@@ -312,4 +446,27 @@
         IsActiveChanged.InvokeAsync(false);
     }
 
+    private string GetLevelText()
+    {
+        return Routine.Level switch
+        {
+            "beginner" => "초급",
+            "intermediate" => "중급",
+            "advanced" => "고급",
+            _ => Routine.Level ?? ""
+        };
+    }
+
+    private string GetCategoryText()
+    {
+        return Routine.Category?.ToLower() switch
+        {
+            "upper_body" => "상체",
+            "lower_body" => "하체",
+            "core" => "코어",
+            "cardio" => "유산소",
+            "full_body" => "전신",
+            _ => Routine.Category ?? ""
+        };
+    }
 }

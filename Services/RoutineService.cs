@@ -1,6 +1,7 @@
 using FitnessPT.Dtos;
 using FitnessPT.Models;
 using FitnessPT.Services.Http;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FitnessPT.Services;
 
@@ -11,6 +12,8 @@ public interface IRoutineService
         int pageSize,
         string level = "",
         string category = "");
+
+    Task<RoutineInfoDto> GetRoutineByIdAsync(int id);
 
     Task<RoutineInfoDto> CreateRoutineAsync(RoutineInfoDto routine);
     Task<RoutineInfoDto> UpdateRoutineAsync(int id, RoutineInfoDto routine);
@@ -49,6 +52,20 @@ public class RoutineService : IRoutineService
             return response.Data;
 
         throw new Exception(response.ErrorMessage ?? "루틴 목록 조회 실패");
+    }
+
+    public async Task<RoutineInfoDto> GetRoutineByIdAsync(int id)
+    {
+        var queryParams = new Dictionary<string, string>
+        {
+            { "id", id.ToString() }
+        };
+        var response = await apiClient.GetAsync<RoutineInfoDto>(Endpoint, queryParams);
+
+        if (response.IsSuccess && response.Data != null)
+            return response.Data;
+
+        throw new Exception(response.ErrorMessage ?? "루틴 상세 조회 실패");
     }
 
     public async Task<RoutineInfoDto> CreateRoutineAsync(RoutineInfoDto routine)

@@ -33,6 +33,20 @@ public class RoutineController
         }
     }
 
+    public async Task<RoutineInfoDto> GetRoutineDetail(int id)
+    {
+        try
+        {
+            var result = await _routineService.GetRoutineByIdAsync(id);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading routine: {ex}");
+            throw;
+        }
+    }
+
     public async Task<bool> CreateRoutineAsync(RoutineInfoDto routine)
     {
         try

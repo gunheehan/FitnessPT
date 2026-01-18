@@ -1,24 +1,50 @@
 @using FitnessPT.Dtos
 
-
-<div class="rouine-card">
-    <div class="card-image-wrapper">
-        <div class="card-image" style="background-image: url('./img/gym_girl.png')"></div>
+<div class="routine-card">
+    <div class="card-actions">
+        <button class="btn-edit" @onclick="HandleEdit" @onclick:stopPropagation>
+            ✏️ 수정
+        </button>
+        <button class="btn-delete" @onclick="HandleDelete" @onclick:stopPropagation>
+            🗑️
+        </button>
     </div>
-    <div class="card-body">
-        <div class="routine-title">@Routine.Name</div>
-        <div class="routine-title">소요시간: @Routine.EstimatedDuration H</div>
-        <div class="badget-category-container">
-            <div class="badge-category">@GetCategoryText()</div>
+
+    <div class="card-clickable" @onclick="HandleView">
+        <div class="card-image-wrapper">
+            <div class="card-image" style="background-image: url('@(string.IsNullOrEmpty(Routine.ThumbnailUrl) ? "./img/gym_girl.png" : Routine.ThumbnailUrl)')"></div>
+        </div>
+        <div class="card-body">
+            <div class="routine-title">@Routine.Name</div>
+            <div class="routine-duration">소요시간: @Routine.EstimatedDuration H</div>
+            <div class="badge-category-container">
+                <span class="badge-level">@GetLevelText()</span>
+                <span class="badge-category">@GetCategoryText()</span>
+            </div>
         </div>
     </div>
 </div>
 
-@code{
-
+@code {
     [Parameter, EditorRequired] public RoutineDto Routine { get; set; } = null;
-    [Parameter] public EventCallback OnEdit { get; set; }
-    [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public EventCallback<RoutineDto> OnView { get; set; }
+    [Parameter] public EventCallback<RoutineDto> OnEdit { get; set; }
+    [Parameter] public EventCallback<int> OnDelete { get; set; }
+
+    private void HandleView()
+    {
+        OnView.InvokeAsync(Routine);
+    }
+
+    private void HandleEdit()
+    {
+        OnEdit.InvokeAsync(Routine);
+    }
+
+    private void HandleDelete()
+    {
+        OnDelete.InvokeAsync(Routine.Id);
+    }
 
     private string GetLevelText()
     {
