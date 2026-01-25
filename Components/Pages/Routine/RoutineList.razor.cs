@@ -42,6 +42,14 @@ public partial class RoutineList : ComponentBase
         Console.WriteLine("OnClick Modal Open");
     }
 
+    private void OpenRoutineDetailModal(RoutineDto routine)
+    {
+        selectedRoutine = routine;
+        isEditMode = false;
+        showModal = true;
+        Console.WriteLine("OnClick Detail Modal Open");
+    }
+
     private async Task SaveRoutine(RoutineInfoDto obj)
     {
         Console.WriteLine("OnClick Save Routine");

@@ -1,19 +1,19 @@
 @using FitnessPT.Components.Controllers
-@using FitnessPT.Dtos
 @using FitnessPT.Components.Shared
+@using FitnessPT.Models
 @inject RoutineController Controller
 
 @rendermode InteractiveServer
 
 <div class="modal-overlay @(IsActive ? "active" : "disabled")" @onclick="OnClose">
-    <div class="modal-content @(IsViewMode ? "view-mode" : "")" @onclick:stopPropagation>
+    <div class="modal-content @(state == ModalState.PREVIEW ? "view-mode" : "")" @onclick:stopPropagation>
         <div class="modal-header">
             <h2>
-                @if (IsViewMode)
+                @if (state == ModalState.PREVIEW)
                 {
                     <span>👁️ 루틴 미리보기</span>
                 }
-                else if (IsEdit)
+                else if (state == ModalState.EDIT)
                 {
                     <span>✏️ 루틴 수정</span>
                 }
@@ -23,7 +23,7 @@
                 }
             </h2>
             <div class="header-actions">
-                @if (IsViewMode)
+                @if (state == ModalState.PREVIEW)
                 {
                     <button class="btn btn-edit" @onclick="SwitchToEditMode">
                         ✏️ 수정하기
@@ -40,7 +40,7 @@
                        class="form-control"
                        @bind="Routine.Name"
                        placeholder="예: 상체 박살 루틴"
-                       disabled="@IsViewMode"/>
+                       disabled="@(state == ModalState.PREVIEW)"/>
             </div>
 
             <div class="form-group">
@@ -49,12 +49,12 @@
                           @bind="Routine.Description"
                           rows="3"
                           placeholder="운동에 대한 설명을 입력하세요"
-                          disabled="@IsViewMode"></textarea>
+                          disabled="@(state == ModalState.PREVIEW)"></textarea>
             </div>
 
             <div class="form-group">
                 <label>루틴 분류</label>
-                @if (IsViewMode)
+                @if (state == ModalState.PREVIEW)
                 {
                     <div class="view-badges">
                         <span class="badge-view level">@GetLevelText()</span>
@@ -77,7 +77,7 @@
                        class="form-control"
                        @bind="Routine.ThumbnailUrl"
                        placeholder="https://example.com/image.jpg"
-                       disabled="@IsViewMode" />
+                       disabled="@(state == ModalState.PREVIEW)" />
                 @if (!string.IsNullOrEmpty(Routine.ThumbnailUrl))
                 {
                     <div class="image-preview">
@@ -86,7 +86,7 @@
                 }
             </div>
 
-            @if (!IsViewMode)
+            @if (state != ModalState.PREVIEW)
             {
                 <div class="form-group">
                     <label>운동 종목 추가</label>
@@ -106,7 +106,7 @@
                                 <div class="exercise-header">
                                     <span class="order-badge">@exercise.OrderIndex</span>
                                     <h4>@exercise.ExerciseName</h4>
-                                    @if (!IsViewMode)
+                                    @if (state != ModalState.PREVIEW)
                                     {
                                         <button class="btn-remove" @onclick="() => RemoveExercise(index)">
                                             🗑️
@@ -121,7 +121,7 @@
                                                min="1"
                                                @bind="exercise.Sets"
                                                class="form-control-sm"
-                                               disabled="@IsViewMode" />
+                                               disabled="@(state == ModalState.PREVIEW)" />
                                     </div>
 
                                     <div class="input-group">
@@ -130,7 +130,7 @@
                                                min="1"
                                                @bind="exercise.Reps"
                                                class="form-control-sm"
-                                               disabled="@IsViewMode" />
+                                               disabled="@(state == ModalState.PREVIEW)" />
                                     </div>
 
                                     <div class="input-group">
@@ -140,7 +140,7 @@
                                                @bind="exercise.DurationSeconds"
                                                class="form-control-sm"
                                                placeholder="선택"
-                                               disabled="@IsViewMode" />
+                                               disabled="@(state == ModalState.PREVIEW)" />
                                     </div>
 
                                     <div class="input-group">
@@ -149,7 +149,7 @@
                                                min="0"
                                                @bind="exercise.RestSeconds"
                                                class="form-control-sm"
-                                               disabled="@IsViewMode" />
+                                               disabled="@(state == ModalState.PREVIEW)" />
                                     </div>
                                 </div>
                             </div>
@@ -160,7 +160,7 @@
         </div>
 
         <div class="modal-footer">
-            @if (IsViewMode)
+            @if (state == ModalState.PREVIEW)
             {
                 <button class="btn btn-secondary" @onclick="OnClose">
                     닫기
@@ -174,7 +174,7 @@
                 <button class="btn btn-primary"
                         @onclick="HandleSave"
                         disabled="@(!IsValid())">
-                    @(IsEdit ? "수정" : "추가")
+                    @((state == ModalState.EDIT) ? "수정" : "추가")
                 </button>
             }
         </div>
@@ -182,291 +182,4 @@
 </div>
 
 <link href="~/css/modal-common.css" rel="stylesheet" />
-
-<style>
-    .header-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .btn-edit {
-        padding: 8px 16px;
-        background-color: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: background-color 0.2s;
-    }
-
-    .btn-edit:hover {
-        background-color: #2563eb;
-    }
-
-    /* 미리보기 모드 스타일 */
-    .view-mode .form-control:disabled,
-    .view-mode .form-control-sm:disabled {
-        background-color: #f9fafb;
-        cursor: not-allowed;
-        opacity: 1;
-        color: #111827;
-    }
-
-    .view-badges {
-        display: flex;
-        gap: 8px;
-        padding: 10px;
-        background-color: #f9fafb;
-        border-radius: 8px;
-    }
-
-    .badge-view {
-        padding: 6px 14px;
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .badge-view.level {
-        background-color: #dbeafe;
-        color: #1e40af;
-    }
-
-    .badge-view.category {
-        background-color: #fef3c7;
-        color: #92400e;
-    }
-
-    /* 기존 스타일들 */
-    .exercise-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 8px;
-    }
-
-    .exercise-item {
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 16px;
-        background-color: #f9fafb;
-    }
-
-    .exercise-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-    }
-
-    .order-badge {
-        background-color: #3b82f6;
-        color: white;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .exercise-header h4 {
-        margin: 0;
-        flex: 1;
-        font-size: 16px;
-        font-weight: 600;
-        color: #111827;
-    }
-
-    .btn-remove {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 18px;
-        padding: 4px 8px;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-    }
-
-    .btn-remove:hover {
-        background-color: #fee2e2;
-    }
-
-    .exercise-inputs {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 12px;
-    }
-
-    .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .input-group label {
-        font-size: 12px;
-        font-weight: 500;
-        color: #6b7280;
-    }
-
-    .form-control-sm {
-        padding: 6px 10px;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        font-size: 14px;
-        width: 100%;
-    }
-
-    .form-control-sm:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .image-preview {
-        margin-top: 12px;
-        border-radius: 8px;
-        overflow: hidden;
-        max-height: 300px;
-    }
-
-    .image-preview img {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-    }
-</style>
-
-@code {
-    [Parameter, EditorRequired] public RoutineDto Routine { get; set; } = new();
-    [Parameter] public bool IsActive { get; set; }
-    [Parameter] public bool IsEdit { get; set; }
-    [Parameter] public bool IsViewMode { get; set; } // 미리보기 모드
-    [Parameter] public EventCallback<RoutineInfoDto> OnSave { get; set; }
-    [Parameter] public EventCallback<bool> IsActiveChanged { get; set; }
-
-    private List<RoutineExerciseDto> exerciseList = new();
-
-    protected override async Task OnParametersSetAsync()
-    {
-        // Routine이 변경될 때마다 운동 목록 로드
-        if (Routine?.Id > 0 && (IsEdit || IsViewMode))
-        {
-            var result = await Controller.GetRoutineDetail(Routine.Id);
-            exerciseList = result.ExerciseInfo;
-        }
-        else if (!IsEdit && !IsViewMode)
-        {
-            exerciseList = new List<RoutineExerciseDto>();
-        }
-    }
-
-    private void SwitchToEditMode()
-    {
-        IsViewMode = false;
-        IsEdit = true;
-        StateHasChanged();
-    }
-
-    private async Task ApplyFilters()
-    {
-        Console.WriteLine($"필터 적용 - 레벨: {Routine.Level}, 카테고리: {Routine.Category}");
-    }
-
-    private bool IsValid()
-    {
-        return !string.IsNullOrWhiteSpace(Routine.Name) &&
-               !string.IsNullOrWhiteSpace(Routine.Level) &&
-               !string.IsNullOrWhiteSpace(Routine.Category) &&
-               exerciseList.Any();
-    }
-
-    private async Task HandleSave()
-    {
-        if (IsValid())
-        {
-            var newInfo = new RoutineInfoDto
-            {
-                Name = Routine.Name,
-                Level = Routine.Level,
-                Category = Routine.Category,
-                ExerciseInfo = exerciseList
-            };
-
-            await OnSave.InvokeAsync(newInfo);
-        }
-    }
-
-    private void AddExercise(ExerciseDto exercise)
-    {
-        if (exerciseList.Any(e => e.ExerciseId == exercise.Id))
-        {
-            Console.WriteLine("이미 추가된 운동입니다.");
-            return;
-        }
-
-        var newExercise = new RoutineExerciseDto
-        {
-            RoutineId = Routine.Id,
-            ExerciseId = exercise.Id,
-            ExerciseName = exercise.Name,
-            OrderIndex = exerciseList.Count + 1,
-            Sets = 3,
-            Reps = 12,
-            DurationSeconds = null,
-            RestSeconds = 60
-        };
-
-        exerciseList.Add(newExercise);
-        StateHasChanged();
-    }
-
-    private void RemoveExercise(int index)
-    {
-        if (index >= 0 && index < exerciseList.Count)
-        {
-            exerciseList.RemoveAt(index);
-
-            for (int i = 0; i < exerciseList.Count; i++)
-            {
-                exerciseList[i].OrderIndex = i + 1;
-            }
-
-            StateHasChanged();
-        }
-    }
-
-    private void OnClose()
-    {
-        IsActiveChanged.InvokeAsync(false);
-    }
-
-    private string GetLevelText()
-    {
-        return Routine.Level switch
-        {
-            "beginner" => "초급",
-            "intermediate" => "중급",
-            "advanced" => "고급",
-            _ => Routine.Level ?? ""
-        };
-    }
-
-    private string GetCategoryText()
-    {
-        return Routine.Category?.ToLower() switch
-        {
-            "upper_body" => "상체",
-            "lower_body" => "하체",
-            "core" => "코어",
-            "cardio" => "유산소",
-            "full_body" => "전신",
-            _ => Routine.Category ?? ""
-        };
-    }
-}
+<link href="~/css/rouine-modal.css" rel="stylesheet" />

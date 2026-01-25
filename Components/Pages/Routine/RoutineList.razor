@@ -23,7 +23,8 @@
         {
             foreach (var routineData in routineList)
             {
-                <RoutineCard Routine="routineData"/>
+                <RoutineCard Routine="routineData"
+                             OnView="OpenRoutineDetailModal"/>
             }
         }
     </div>
@@ -33,5 +34,6 @@
     Routine="selectedRoutine"
     IsActive="showModal"
     IsEdit="isEditMode"
+    IsViewMode="true"
     OnSave="SaveRoutine"
     IsActiveChanged="(value) => showModal = value"/>
