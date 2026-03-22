@@ -1,0 +1,83 @@
+@page "/chat"
+@using FitnessPT.Components.Pages.Chat
+@inherits ChatPageBase
+@rendermode InteractiveServer
+
+<PageTitle>Chat</PageTitle>
+
+<div class="chat-container">
+
+    @* ── 연결 전 입력 폼 ── *@
+    @if (!IsConnected)
+    {
+        <div class="chat-join-form">
+            <h4>채팅 참여</h4>
+
+            <div class="mb-3">
+                <label class="form-label">이름</label>
+                <input class="form-control" @bind="UserName" placeholder="이름 입력" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">룸 ID</label>
+                <input class="form-control" @bind="RoomId" placeholder="룸 ID 입력 (예: general)" />
+            </div>
+            <button class="btn btn-primary" @onclick="ConnectAsync">입장</button>
+        </div>
+    }
+    else
+    {
+        @* ── 채팅 헤더 ── *@
+        <div class="chat-header">
+            <span class="chat-room-name"># @RoomId</span>
+            <span class="chat-user-name">@UserName</span>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="DisconnectAsync">나가기</button>
+        </div>
+
+        @* ── 메시지 목록 ── *@
+        <div class="chat-messages" id="chatMessages">
+            @foreach (var msg in Messages)
+            {
+                <div class="chat-message @(msg.UserId == ConnectionId ? "mine" : "others")">
+                    @if (msg.Type == "joined")
+                    {
+                        <div class="chat-system">
+                            <span>@msg.UserName 님이 입장했습니다.</span>
+                        </div>
+                    }
+                    else if (msg.Type == "left")
+                    {
+                        <div class="chat-system">
+                            <span>@msg.UserId 님이 퇴장했습니다.</span>
+                        </div>
+                    }
+                    else if (msg.Type == "message")
+                    {
+                        <div class="chat-bubble-wrapper">
+                            @if (msg.UserId != ConnectionId)
+                            {
+                                <div class="chat-sender">@msg.UserName</div>
+                            }
+                            <div class="chat-bubble">@msg.Content</div>
+                            <div class="chat-time">@msg.DisplayTime</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @* ── 메시지 입력 ── *@
+        <div class="chat-input-bar">
+            <input class="form-control"
+                   @bind="InputText"
+                   @bind:event="oninput"
+                   @onkeydown="OnKeyDown"
+                   placeholder="메시지를 입력하세요..." />
+            <button class="btn btn-primary" @onclick="SendMessageAsync"
+                    disabled="@string.IsNullOrWhiteSpace(InputText)">
+                전송
+            </button>
+        </div>
+    }
+</div>
+
+<script src="/js/chat.js"></script>

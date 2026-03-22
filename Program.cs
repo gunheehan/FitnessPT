@@ -2,6 +2,8 @@ using FitnessPT.Components;
 using FitnessPT.Components.Controllers;
 using FitnessPT.Services;
 using FitnessPT.Services.Http;
+using FitnessPT.WebSocket;
+using FitnessPT.WebSocket.Chat;
 using ISession = FitnessPT.Services.ISession;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,14 @@ builder.Services.AddScoped<IRoutineService, RoutineService>();
 builder.Services.AddScoped<ISession, SessionService>();
 builder.Services.AddScoped<AlertService>();
 
+// WebSocket 인프라 등록
+builder.Services.AddSingleton<WebSocketConnectionManager>();
+builder.Services.AddSingleton<WebSocketMiddleware>();
+
+// 채팅 서비스 등록
+builder.Services.AddSingleton<ChatRoomManager>();
+builder.Services.AddSingleton<ChatWebSocketHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -34,6 +44,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// WebSocket 활성화 + 경로 매핑
+app.UseWebSockets();
+app.UseMiddleware<WebSocketMiddleware>();
+
+var wsMiddleware = app.Services.GetRequiredService<WebSocketMiddleware>();
+wsMiddleware.MapHandler("/ws/chat", typeof(ChatWebSocketHandler));
+
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
