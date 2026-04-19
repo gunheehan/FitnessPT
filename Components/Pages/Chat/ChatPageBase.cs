@@ -28,6 +28,7 @@ public class ChatPageBase : ComponentBase, IAsyncDisposable
     {
         if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(RoomId)) return;
 
+        _dotnetRef?.Dispose();
         _dotnetRef = DotNetObjectReference.Create(this);
 
         var wsUrl = Nav.BaseUri
@@ -71,7 +72,6 @@ public class ChatPageBase : ComponentBase, IAsyncDisposable
                 {
                     Type = "join",
                     RoomId = RoomId,
-                    UserId = ConnectionId,
                     UserName = UserName
                 });
                 break;

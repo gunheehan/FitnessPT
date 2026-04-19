@@ -22,7 +22,6 @@ public abstract class WebSocketHandlerBase : IWebSocketHandler
 
     public virtual Task OnDisconnectedAsync(WebSocketConnection connection, Exception? exception)
     {
-        ConnectionManager.RemoveConnection(connection.ConnectionId);
         return Task.CompletedTask;
     }
 

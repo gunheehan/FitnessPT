@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
+using System.Threading;
 
 namespace FitnessPT.WebSocket;
 
@@ -10,6 +11,7 @@ public class WebSocketConnectionManager
 {
     private readonly ConcurrentDictionary<string, WebSocketConnection> _connections = new();
     private readonly int _maxConnections;
+    private int _connectionSlots;
 
     public WebSocketConnectionManager(int maxConnections = 1000)
     {
@@ -23,17 +25,29 @@ public class WebSocketConnectionManager
     /// </summary>
     public WebSocketConnection? AddConnection(System.Net.WebSockets.WebSocket socket)
     {
-        if (_connections.Count >= _maxConnections) return null;
+        if (Interlocked.Increment(ref _connectionSlots) > _maxConnections)
+        {
+            Interlocked.Decrement(ref _connectionSlots);
+            return null;
+        }
 
         var connection = new WebSocketConnection { Socket = socket };
-        _connections[connection.ConnectionId] = connection;
+        if (!_connections.TryAdd(connection.ConnectionId, connection))
+        {
+            Interlocked.Decrement(ref _connectionSlots);
+            return null;
+        }
+
         return connection;
     }
 
     public void RemoveConnection(string connectionId)
     {
         if (_connections.TryRemove(connectionId, out var conn))
+        {
+            Interlocked.Decrement(ref _connectionSlots);
             conn.Dispose();
+        }
     }
 
     public WebSocketConnection? GetConnection(string connectionId)

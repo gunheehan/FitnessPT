@@ -30,9 +30,16 @@ public class ChatRoomManager
 
         if (_rooms.TryGetValue(roomId, out var entry))
         {
+            var shouldRemoveRoom = false;
             lock (entry)
             {
                 entry.Members.Remove(connectionId);
+                shouldRemoveRoom = entry.Members.Count == 0;
+            }
+
+            if (shouldRemoveRoom)
+            {
+                _rooms.TryRemove(roomId, out _);
             }
         }
 

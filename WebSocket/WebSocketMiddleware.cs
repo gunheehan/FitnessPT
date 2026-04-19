@@ -77,13 +77,16 @@ public class WebSocketMiddleware
             connection.ConnectionId, context.Connection.RemoteIpAddress);
 
         using var cts = new CancellationTokenSource();
+        Task? receiveTask = null;
+        Task? pingTask = null;
+        Exception? disconnectException = null;
 
         try
         {
             await handler.OnConnectedAsync(connection);
 
-            var receiveTask = ReceiveLoopAsync(connection, handler, cts.Token);
-            var pingTask = PingLoopAsync(connection, cts.Token);
+            receiveTask = ReceiveLoopAsync(connection, handler, cts.Token);
+            pingTask = PingLoopAsync(connection, cts.Token);
 
             // 먼저 끝난 Task를 await해서 예외를 전파받음
             var completed = await Task.WhenAny(receiveTask, pingTask);
@@ -92,12 +95,35 @@ public class WebSocketMiddleware
         catch (OperationCanceledException) { /* 정상 종료 */ }
         catch (Exception ex)
         {
+            disconnectException = ex;
             _logger.LogError(ex, "WebSocket error: {ConnectionId}", connection.ConnectionId);
-            await handler.OnDisconnectedAsync(connection, ex);
         }
         finally
         {
             await cts.CancelAsync();
+
+            try
+            {
+                if (receiveTask is not null || pingTask is not null)
+                {
+                    await Task.WhenAll(receiveTask ?? Task.CompletedTask, pingTask ?? Task.CompletedTask);
+                }
+            }
+            catch (OperationCanceledException) { /* 정상 종료 */ }
+            catch (Exception ex) when (disconnectException is null)
+            {
+                disconnectException = ex;
+                _logger.LogError(ex, "WebSocket shutdown error: {ConnectionId}", connection.ConnectionId);
+            }
+
+            try
+            {
+                await handler.OnDisconnectedAsync(connection, disconnectException);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "WebSocket disconnect handler failed: {ConnectionId}", connection.ConnectionId);
+            }
 
             connectionManager.RemoveConnection(connection.ConnectionId);
 
@@ -144,7 +170,6 @@ public class WebSocketMiddleware
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    await handler.OnDisconnectedAsync(connection, null);
                     break;
                 }
 

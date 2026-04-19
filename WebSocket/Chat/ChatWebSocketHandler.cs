@@ -90,6 +90,7 @@ public class ChatWebSocketHandler : WebSocketHandlerBase
             case "join":    await HandleJoinAsync(connection, msg);    break;
             case "message": await HandleMessageAsync(connection, msg); break;
             case "leave":   await HandleLeaveAsync(connection);        break;
+            case "pong":    break;
             default:
                 await SendErrorAsync(connection.ConnectionId, $"Unknown type: {msg.Type}");
                 break;
@@ -120,7 +121,7 @@ public class ChatWebSocketHandler : WebSocketHandlerBase
 
         // ── 보안: UserId/UserName은 Join 시 한 번만 서버에 저장 ──
         // 이후 메시지에서 클라이언트가 보내는 값은 무시하고 여기 저장된 값 사용
-        connection.UserId = msg.UserId ?? connection.ConnectionId;
+        connection.UserId = connection.ConnectionId;
         connection.UserName = msg.UserName.Trim();
 
         _roomManager.JoinRoom(msg.RoomId, connection.ConnectionId);
@@ -144,8 +145,9 @@ public class ChatWebSocketHandler : WebSocketHandlerBase
         }
 
         // ── 입력 검증 ──────────────────────────────────────
-        if (string.IsNullOrWhiteSpace(msg.Content)) return;
-        if (msg.Content.Length > MaxContentLength)
+        var content = msg.Content?.Trim();
+        if (string.IsNullOrWhiteSpace(content)) return;
+        if (content.Length > MaxContentLength)
         {
             await SendErrorAsync(connection.ConnectionId, $"Message too long (max {MaxContentLength})");
             return;
@@ -157,7 +159,7 @@ public class ChatWebSocketHandler : WebSocketHandlerBase
             RoomId = roomId,
             UserId = connection.UserId,
             UserName = connection.UserName,  // 클라이언트 값 무시, 서버 저장값 사용
-            Content = msg.Content.Trim()
+            Content = content
         });
     }
 
@@ -222,4 +224,3 @@ public class ChatWebSocketHandler : WebSocketHandlerBase
     private Task SendErrorAsync(string connectionId, string error)
         => SendAsync(connectionId, new ChatMessage { Type = "error", Content = error });
 }
-
